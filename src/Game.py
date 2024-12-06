@@ -1,10 +1,16 @@
+from Deck import Card, Deck
+from Player import Player
+import logging
+
+logging.basicConfig(level=logging.INFO)
+
 class Game:
     def __init__(self):
         self.players = [Player("Player 1"), Player("Player 2")] 
         self.count_turn = 0
         self.deck = Deck()
         self.results = []
-        self.ilosc_kart_do_dobrania = 1
+        self.number_of_cards_to_draw = 1
         self.next_player_takes_cards = False
 
     def track_turn(self):
@@ -33,11 +39,11 @@ class Game:
     def is_deck_empty(self):
         return self.deck.is_empty()
 
-    def take_card(self,player_index):
+    def draw_card(self,player_index):
         player = self.players[player_index]
-        for _ in range(self.ilosc_kart_do_dobrania):
+        for _ in range(self.number_of_cards_to_draw):
             player.draw_card(self.deck)
-        self.ilosc_kart_do_dobrania = 1
+        self.number_of_cards_to_draw = 1
         self.next_player_takes_cards = False
 
     def play_card(self, player_index, card_index):
@@ -48,9 +54,9 @@ class Game:
         if self.is_valid_move(card, top_card):
             player.throw_card(card_index, self.deck)
             if card.value == "Draw Two":
-                self.ilosc_kart_do_dobrania += 2
+                self.number_of_cards_to_draw += 2
             if card.value == "Wild Draw Four":
-                self.ilosc_kart_do_dobrania += 4
+                self.number_of_cards_to_draw += 4
             return True
         else:
             return False
@@ -67,4 +73,45 @@ class Game:
             if len(player.cards_in_hand) == 0:
                 return player
         return None
-                    
+    
+    def take_your_turn(self):
+        logging.info("Your cards: ")
+        logging.info(self.players[0].display_cards_in_hand())
+        logging.info("Which card do you want to play?")
+        number = int(input("Type number of card (from 1 to {x}) or 0 if you want to draw a card: ".format(x=self.players[0].count_cards_in_hand())))
+        return number - 1
+    
+    def random_move(self):
+        for i in range(self.players[1].count_cards_in_hand()):
+            if game.play_card(1, i):
+                return True
+        return False         
+    
+if __name__ == "__main__":
+    game = Game()
+    game.start_game()
+    while game.check_winner() == None:
+        print("The top of the stack: ")
+        print(game.deck.get_top_discarded_card())
+        print("Your turn!")
+        while True:
+            result = game.take_your_turn()
+            if result == -1:
+                game.draw_card(0)
+                print("You drew a card.\n")
+                break
+            elif game.play_card(0, result):
+                print("You played '{played_card}'.\n".format(played_card=game.deck.get_top_discarded_card()))
+                break
+        print("The top of the stack: ")
+        print(game.deck.get_top_discarded_card())
+        print("My turn!")
+        if game.random_move():
+            print("I played '{played_card}'.\n".format(played_card=game.deck.get_top_discarded_card()))
+        else:
+            game.draw_card(1)
+            print("I drew a card.\n")
+    if game.check_winner == game.players[0]:
+        print("You won!")
+    else:
+        print("I won!")
