@@ -27,7 +27,10 @@ class Player:
     def display_cards_in_hand(self):
         s = ''
         for i, card in enumerate(self.cards_in_hand):
-            s += card.color + ' ' + card.value
+            s += str([i+1]) + ' ' + card.color + ' ' + card.value
             if i < len(self.cards_in_hand) - 1:
                 s += ', '
         return s
+    
+    def count_cards_in_hand(self):
+        return len(self.cards_in_hand)
