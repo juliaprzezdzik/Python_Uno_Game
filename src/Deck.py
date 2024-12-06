@@ -41,17 +41,22 @@ class Deck:
             return True
         return False
     
+    def discard_card(self, card):
+        self.discarded.append(card)
+        
+    def get_top_discarded_card(self):
+        if self.discarded:
+            return self.discarded[-1]
+        return None
+    
     def draw_card(self):
         if(self.is_empty()):
             self.deck = self.discarded[:-2]
             temp = self.discarded[-2]
             self.discarded = []
-            self.discarded.append(temp)
+            self.discard_card(temp)
             self.shuffle()
         return self.deck.pop()
-
-    def discard_card(self, card):
-        self.discarded.append(card)
  
     def display_deck(self):
         for card in self.deck:
