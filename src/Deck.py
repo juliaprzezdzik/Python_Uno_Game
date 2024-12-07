@@ -1,7 +1,6 @@
 import random
 from dataclasses import dataclass
 
-#class Card add by Ola
 @dataclass
 class Card:
     value: str
