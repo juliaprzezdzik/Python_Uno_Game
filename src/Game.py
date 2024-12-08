@@ -61,11 +61,11 @@ class Game:
         else:
             return False
 
-    def start_game(self, initial_hand_size=7):
+    def start_game(self, initial_hand_size=3):
         self.reset_game()
         self.deck.shuffle()
         self.deal_cards(initial_hand_size)
-        first_card = self.deck.draw_card()
+        first_card = self.deck.get_first_card()
         self.deck.discard_card(first_card)
 
     def check_winner(self):
@@ -81,11 +81,17 @@ class Game:
         number = int(input("Type number of card (from 1 to {x}) or 0 if you want to draw a card: ".format(x=self.players[0].count_cards_in_hand())))
         return number - 1
     
+    # def random_move(self):
+    #     for i in range(self.players[1].count_cards_in_hand()):
+    #         if game.play_card(1, i):
+    #             return True
+    #     return False
+
     def random_move(self):
         for i in range(self.players[1].count_cards_in_hand()):
-            if game.play_card(1, i):
-                return True
-        return False         
+            if self.play_card(1, i):
+                return
+        self.draw_card(1)           
     
 if __name__ == "__main__":
     game = Game()
