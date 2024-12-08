@@ -25,17 +25,21 @@ FONT = pygame.font.SysFont("Arial", 20)
 CARD_WIDTH, CARD_HEIGHT = 80, 120
 CARD_SPACING = 10
 
-def draw_card(card, x, y, highlight=False):
-    color = COLORS[card.color]
-    text = FONT.render(card.value, True, BLACK)    
+def draw_card(card, x, y, disable_highlight, is_mouse_over=False, draw_pile=False):
+    if draw_pile:
+        color = (0,0,0)
+        text = FONT.render("UNO", True, WHITE)
+    else:
+        color = COLORS[card.color]
+        text = FONT.render(card.value, True, BLACK)   
 
     pygame.draw.rect(screen, color, (x, y, CARD_WIDTH, CARD_HEIGHT))
-    if highlight:
+    if is_mouse_over and not disable_highlight:
         pygame.draw.rect(screen, HIGHLIGHT, (x, y, CARD_WIDTH, CARD_HEIGHT), 5)
     text_rect = text.get_rect(center=(x + CARD_WIDTH // 2, y + CARD_HEIGHT // 2))
     screen.blit(text, text_rect)
 
-def display_player_hand(y, player):
+def display_player_hand(y, player, disable_highlight=False):
     x = CARD_SPACING
     # y = HEIGHT - CARD_HEIGHT - 20
     mouse_pos = pygame.mouse.get_pos()
@@ -44,23 +48,13 @@ def display_player_hand(y, player):
     for i, card in enumerate(player.cards_in_hand):
         card_rect = pygame.Rect(x, y, CARD_WIDTH, CARD_HEIGHT)
         highlight = card_rect.collidepoint(mouse_pos)
-        draw_card(card, x, y, highlight)
+        draw_card(card, x, y, disable_highlight, highlight)
 
         if highlight:
             highlighted_card = i
 
         x += CARD_WIDTH + CARD_SPACING
     return highlighted_card
-
-def draw_pile_card(x, y, disable_highlight, is_mouse_over=False): 
-
-    pygame.draw.rect(screen, BLACK, (x, y, CARD_WIDTH, CARD_HEIGHT))
-    text = FONT.render("UNO", True, WHITE)
-
-    if is_mouse_over and not disable_highlight:
-        pygame.draw.rect(screen, HIGHLIGHT, (x, y, CARD_WIDTH, CARD_HEIGHT), 5)
-    text_rect = text.get_rect(center=(x + CARD_WIDTH // 2, y + CARD_HEIGHT // 2))
-    screen.blit(text, text_rect)
 
 def display_and_check_deck(deck, disable_highlight=False):
     x = (WIDTH - CARD_WIDTH)// 2
@@ -69,9 +63,9 @@ def display_and_check_deck(deck, disable_highlight=False):
     card_rect = pygame.Rect(x - CARD_WIDTH - 4 * CARD_SPACING, y, CARD_WIDTH, CARD_HEIGHT)
     is_mouse_over = card_rect.collidepoint(mouse_pos)
     
-    draw_pile_card(x - CARD_WIDTH - 4 * CARD_SPACING, y, disable_highlight, is_mouse_over)
+    draw_card(None, x - CARD_WIDTH - 4 * CARD_SPACING, y, disable_highlight, is_mouse_over, True)
     first_card = deck.get_top_discarded_card()
-    draw_card(first_card, x, y)
+    draw_card(first_card, x, y, disable_highlight)
     return is_mouse_over
 
 def run():
@@ -89,12 +83,14 @@ def run():
 
         if pause_after_card:
             is_draw_pile_clicked = display_and_check_deck(game.deck, True)
+            highlighted_card = display_player_hand(HEIGHT - CARD_HEIGHT - 20, game.players[0], True)
             pygame.display.flip()
-            pygame.time.wait(1000)
+            pygame.time.wait(500)
+            pygame.event.clear()
             pause_after_card = False  
             game.track_turn() 
             
-        if game.count_turn == 0:
+        if game.count_turn == 0 and not pause_after_card:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     is_running = False
@@ -114,4 +110,3 @@ def run():
             pause_after_card = True
         pygame.display.flip()
     pygame.quit()
-
