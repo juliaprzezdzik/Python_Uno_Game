@@ -10,7 +10,7 @@ class Game:
         self.count_turn = 0
         self.deck = Deck()
         self.results = []
-        self.number_of_cards_to_draw = 1
+        self.bonus_number_of_cards_to_draw = 0
         self.next_player_takes_cards = False
         self.skip = False
 
@@ -38,16 +38,17 @@ class Game:
                 return True
             else:
                 return False
-        return top_card.color == "All" or card.color == "All" or card.color == top_card.color or card.value == top_card.value
+        if self.next_player_takes_cards == False:
+            return top_card.color == "All" or card.color == "All" or card.color == top_card.color or card.value == top_card.value
 
     def is_deck_empty(self):
         return self.deck.is_empty()
 
     def draw_card(self,player_index):
         player = self.players[player_index]
-        for _ in range(self.number_of_cards_to_draw):
+        for _ in range( 1 + self.bonus_number_of_cards_to_draw):
             player.draw_card(self.deck)
-        self.number_of_cards_to_draw = 1
+        self.bonus_number_of_cards_to_draw = 0
         self.next_player_takes_cards = False
 
     def play_card(self, player_index, card_index):
@@ -58,9 +59,9 @@ class Game:
         if self.is_valid_move(card, top_card):
             player.throw_card(card_index, self.deck)
             if card.value == "Draw Two":
-                self.number_of_cards_to_draw += 2
+                self.bonus_number_of_cards_to_draw += 2
             if card.value == "Wild Draw Four":
-                self.number_of_cards_to_draw += 4
+                self.bonus_number_of_cards_to_draw += 4
             if card.value == "Skip":
                 self.skip = True
             return True
@@ -86,12 +87,6 @@ class Game:
         logging.info("Which card do you want to play?")
         number = int(input("Type number of card (from 1 to {x}) or 0 if you want to draw a card: ".format(x=self.players[0].count_cards_in_hand())))
         return number - 1
-    
-    # def random_move(self):
-    #     for i in range(self.players[1].count_cards_in_hand()):
-    #         if game.play_card(1, i):
-    #             return True
-    #     return False
 
     def random_move(self):
         for i in range(self.players[1].count_cards_in_hand()):
@@ -127,4 +122,3 @@ if __name__ == "__main__":
         print("You won!")
     else:
         print("I won!")
-
