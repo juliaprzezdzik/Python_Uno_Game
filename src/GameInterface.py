@@ -80,7 +80,6 @@ def run():
 
     selected_card = None
     running = True
-    turn = "player_turn"
 
     while game.check_winner() == None and running:
         screen.fill(WHITE)
@@ -102,7 +101,6 @@ def run():
                             game.track_turn()
                     if event.key == pygame.K_SPACE and uno_card is True:
                         game.draw_card(0)
-                        # turn = "opponent_turn"
                         game.track_turn()
 
             if selected_card is not None:
@@ -117,4 +115,3 @@ def run():
         pygame.display.flip()
 
     pygame.quit()
-
