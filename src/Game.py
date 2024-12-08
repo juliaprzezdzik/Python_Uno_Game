@@ -12,9 +12,13 @@ class Game:
         self.results = []
         self.number_of_cards_to_draw = 1
         self.next_player_takes_cards = False
+        self.skip = False
 
     def track_turn(self):
-        self.count_turn = 1 - self.count_turn  
+        if self.skip:
+            self.skip = False
+            return
+        self.count_turn = 1 - self.count_turn
 
     def save_results(self, result):
         self.results.append(result)
@@ -57,6 +61,8 @@ class Game:
                 self.number_of_cards_to_draw += 2
             if card.value == "Wild Draw Four":
                 self.number_of_cards_to_draw += 4
+            if card.value == "Skip":
+                self.skip = True
             return True
         else:
             return False
@@ -121,3 +127,4 @@ if __name__ == "__main__":
         print("You won!")
     else:
         print("I won!")
+
