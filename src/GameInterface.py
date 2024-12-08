@@ -87,7 +87,7 @@ def run():
         display_player_hand(20, game.players[1])
         highlighted_card = display_player_hand(HEIGHT - CARD_HEIGHT - 20, game.players[0])
 
-        if turn == "player_turn":   
+        if game.count_turn == 0:   
             uno_card = display_deck(game.deck)       
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -99,20 +99,22 @@ def run():
                     if event.key == pygame.K_SPACE and selected_card is not None:
                         if game.play_card(0, selected_card):
                             selected_card = None
-                            turn = "opponent_turn"
+                            game.track_turn()
                     if event.key == pygame.K_SPACE and uno_card is True:
                         game.draw_card(0)
-                        turn = "opponent_turn"
+                        # turn = "opponent_turn"
+                        game.track_turn()
 
             if selected_card is not None:
                 x = selected_card * (CARD_WIDTH + CARD_SPACING) + CARD_SPACING
                 y = HEIGHT - CARD_HEIGHT - 20
                 pygame.draw.rect(screen, HIGHLIGHT, (x, y, CARD_WIDTH, CARD_HEIGHT), 5)
             
-        elif turn == "opponent_turn":
+        elif game.count_turn == 1:
             game.random_move()
-            turn = "player_turn"
+            game.track_turn()
 
         pygame.display.flip()
 
     pygame.quit()
+
