@@ -113,10 +113,10 @@ def run():
             text_rect = turn_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 150))
             screen.blit(turn_text, text_rect)
 
-        draw_player_avatar(0, game.count_turn == 0, 20)
+        draw_player_avatar(1, game.count_turn == 1, 20)
         display_player_hand(20, game.players[1], hide_cards=True)
 
-        draw_player_avatar(1, game.count_turn == 1, HEIGHT - 120)
+        draw_player_avatar(0, game.count_turn == 0, HEIGHT - 120)
         highlighted_card = display_player_hand(HEIGHT - CARD_HEIGHT - 20, game.players[0])
 
         is_draw_pile_clicked = display_and_check_deck(game.deck)
