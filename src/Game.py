@@ -55,7 +55,7 @@ class Game:
         else:
             player.draw_card(self.deck)
 
-    def play_card(self, player_index, card_index):
+        def play_card(self, player_index, card_index):
         player = self.players[player_index]
         top_card = self.deck.get_top_discarded_card()
         card = player.cards_in_hand[card_index]
@@ -70,6 +70,8 @@ class Game:
                 self.bonus_number_of_cards_to_draw += 4
                 self.next_player_takes_cards = True
                 self.draw_card(1 - player_index)
+            elif card.value == "Skip":
+                self.skip = True
 
             return True
         else:
