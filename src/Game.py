@@ -4,9 +4,10 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
+
 class Game:
     def __init__(self):
-        self.players = [Player("Player 1"), Player("Player 2")] 
+        self.players = [Player("Player 1"), Player("Player 2")]
         self.count_turn = 0
         self.deck = Deck()
         self.results = []
@@ -31,10 +32,10 @@ class Game:
             for _ in range(num_cards):
                 if not self.deck.is_empty():
                     player.draw_card(self.deck)
-    
+
     def is_valid_move(self, card, top_card):
         if top_card.value in ["Draw Two", "Wild Draw Four"] and self.next_player_takes_cards == True:
-            if card.value in ["Wild Draw Four","Draw Two"]:
+            if card.value in ["Wild Draw Four", "Draw Two"]:
                 return True
             else:
                 return False
@@ -44,12 +45,15 @@ class Game:
     def is_deck_empty(self):
         return self.deck.is_empty()
 
-    def draw_card(self,player_index):
+    def draw_card(self, player_index):
         player = self.players[player_index]
-        for _ in range( 1 + self.bonus_number_of_cards_to_draw):
+        if self.bonus_number_of_cards_to_draw > 0:
+            for _ in range(self.bonus_number_of_cards_to_draw):
+                player.draw_card(self.deck)
+            self.bonus_number_of_cards_to_draw = 0
+            self.next_player_takes_cards = False
+        else:
             player.draw_card(self.deck)
-        self.bonus_number_of_cards_to_draw = 0
-        self.next_player_takes_cards = False
 
     def play_card(self, player_index, card_index):
         player = self.players[player_index]
@@ -60,10 +64,13 @@ class Game:
             player.throw_card(card_index, self.deck)
             if card.value == "Draw Two":
                 self.bonus_number_of_cards_to_draw += 2
-            if card.value == "Wild Draw Four":
+                self.next_player_takes_cards = True
+                self.draw_card(1 - player_index)
+            elif card.value == "Wild Draw Four":
                 self.bonus_number_of_cards_to_draw += 4
-            if card.value == "Skip":
-                self.skip = True
+                self.next_player_takes_cards = True
+                self.draw_card(1 - player_index)
+
             return True
         else:
             return False
@@ -80,20 +87,22 @@ class Game:
             if len(player.cards_in_hand) == 0:
                 return player
         return None
-    
+
     def take_your_turn(self):
         logging.info("Your cards: ")
         logging.info(self.players[0].display_cards_in_hand())
         logging.info("Which card do you want to play?")
-        number = int(input("Type number of card (from 1 to {x}) or 0 if you want to draw a card: ".format(x=self.players[0].count_cards_in_hand())))
+        number = int(input("Type number of card (from 1 to {x}) or 0 if you want to draw a card: ".format(
+            x=self.players[0].count_cards_in_hand())))
         return number - 1
 
     def random_move(self):
         for i in range(self.players[1].count_cards_in_hand()):
             if self.play_card(1, i):
                 return
-        self.draw_card(1)           
-    
+        self.draw_card(1)
+
+
 if __name__ == "__main__":
     game = Game()
     game.start_game()
