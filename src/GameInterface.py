@@ -9,7 +9,7 @@ WIDTH, HEIGHT = 1000, 800
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("UNO Card Interface")
 
-background_image = pygame.image.load('assets/table.jpg')
+background_image = pygame.image.load('../assets/table.jpg')
 background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
 
 WHITE = (255, 255, 255)
@@ -83,9 +83,9 @@ def display_and_check_deck(deck, disable_highlight=False):
 
 def draw_player_avatar(player_num, is_turn, y_position):
     if player_num == 1:
-        avatar_image = pygame.image.load('assets/avatar1.jpg')
+        avatar_image = pygame.image.load('../assets/avatar1.jpg')
     else:
-        avatar_image = pygame.image.load('assets/avatar2.jpg')
+        avatar_image = pygame.image.load('../assets/avatar2.jpg')
     avatar_image = pygame.transform.scale(avatar_image, (100, 100))
     avatar_rect = pygame.Rect(WIDTH - 150, y_position, 100, 100)
     screen.blit(avatar_image, avatar_rect)
