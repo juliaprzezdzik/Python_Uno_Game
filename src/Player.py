@@ -25,12 +25,8 @@ class Player:
         self.cards_in_hand.sort(key=lambda card: (card.color, card.value))
     
     def display_cards_in_hand(self):
-        s = ''
-        for i, card in enumerate(self.cards_in_hand):
-            s += f"[{i+1}] {card.color} {card.value}"
-            if i < len(self.cards_in_hand) - 1:
-                s += ', '
-        return s
+        card_descriptions = [f"[{i+1}] {card.color} {card.value}" for i, card in enumerate(self.cards_in_hand)]
+        return ', '.join(card_descriptions)
     
     def count_cards_in_hand(self):
         return len(self.cards_in_hand)
