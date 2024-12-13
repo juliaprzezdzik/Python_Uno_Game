@@ -1,6 +1,7 @@
 from Deck import Card, Deck
 from Player import Player
 import logging
+import random
 
 logging.basicConfig(level=logging.INFO)
 
@@ -13,6 +14,7 @@ class Game:
         self.bonus_number_of_cards_to_draw = 0
         self.next_player_takes_cards = False
         self.skip = False
+        self.is_color_changed = False
 
     def track_turn(self):
         if self.skip:
@@ -63,14 +65,22 @@ class Game:
                 self.next_player_takes_cards = True
             if card.value == "Wild Draw Four":
                 self.bonus_number_of_cards_to_draw += 4
+                self.is_color_changed = True
                 self.next_player_takes_cards = True
             if card.value == "Skip":
                 self.skip = True
+            if card.value == "Wild":
+                self.is_color_changed = True
             return True
         else:
             return False
+        
+    def change_color(self, color):
+        card = self.deck.get_top_discarded_card()
+        card.color = color
+        self.is_color_changed = False
 
-    def start_game(self, initial_hand_size=3):
+    def start_game(self, initial_hand_size=7):
         self.reset_game()
         self.deck.shuffle()
         self.deal_cards(initial_hand_size)
@@ -93,6 +103,9 @@ class Game:
     def random_move(self):
         for i in range(self.players[1].count_cards_in_hand()):
             if self.play_card(1, i):
+                if self.is_color_changed:
+                    color = random.choice(self.deck.colors[:-1])
+                    self.change_color(color)
                 return
         self.draw_card(1)           
     
@@ -124,4 +137,3 @@ if __name__ == "__main__":
         print("You won!")
     else:
         print("I won!")
-
