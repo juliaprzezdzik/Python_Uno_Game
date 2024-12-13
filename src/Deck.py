@@ -1,5 +1,6 @@
 import random
 from dataclasses import dataclass
+import copy
 
 @dataclass
 class Card:
@@ -41,7 +42,7 @@ class Deck:
         return False
     
     def discard_card(self, card):
-        self.discarded.append(card)
+        self.discarded.append(copy.deepcopy(card))
         
     def get_top_discarded_card(self):
         if self.discarded:
@@ -70,4 +71,4 @@ class Deck:
 
     def display_discarted(self):
         for card in self.discarded:
-            print(f'{card}')      
+            print(f'{card}')
