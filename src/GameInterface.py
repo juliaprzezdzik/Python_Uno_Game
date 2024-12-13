@@ -25,6 +25,30 @@ COLORS = {
 }
 FONT = pygame.font.SysFont("Arial", 20)
 
+def display_start_menu():
+    screen.fill(WHITE)
+    title_text = FONT.render("UNO Game", True, BLACK)
+    title_rect = title_text.get_rect(center=(WIDTH // 2, HEIGHT // 4))
+    screen.blit(title_text, title_rect)
+    start_button_text = FONT.render("Start Game!", True, WHITE)
+    start_button_rect = pygame.Rect(WIDTH // 2 - 100, HEIGHT // 2 - 50, 200, 100)
+    pygame.draw.rect(screen, BLACK, start_button_rect)
+    screen.blit(start_button_text, start_button_text.get_rect(center=start_button_rect.center))
+    pygame.display.flip()
+    return start_button_rect
+
+def start_menu():
+    running = True
+    while running:
+        start_button_rect = display_start_menu()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if start_button_rect.collidepoint(event.pos):
+                    running = False
+                    
 def draw_card(card, x, y, disable_highlight, is_mouse_over=False, draw_pile=False):
     if draw_pile:
         color = (0, 0, 0)
@@ -173,4 +197,5 @@ def run():
         pygame.quit()
 
 if __name__ == "__main__":
+    start_menu()
     run()
