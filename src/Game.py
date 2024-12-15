@@ -57,7 +57,6 @@ class Game:
         player = self.players[player_index]
         top_card = self.deck.get_top_discarded_card()
         card = player.cards_in_hand[card_index]
-
         if self.is_valid_move(card, top_card):
             player.throw_card(card_index, self.deck)
             if card.value == "Draw Two":
@@ -91,6 +90,8 @@ class Game:
         for player in self.players:
             if len(player.cards_in_hand) == 0:
                 return player
+            elif len(self.deck.discarded) < 1:
+                return self.players[0]
         return None
     
     def take_your_turn(self):
@@ -100,14 +101,14 @@ class Game:
         number = int(input("Type number of card (from 1 to {x}) or 0 if you want to draw a card: ".format(x=self.players[0].count_cards_in_hand())))
         return number - 1
 
-    def random_move(self):
-        for i in range(self.players[1].count_cards_in_hand()):
-            if self.play_card(1, i):
+    def random_move(self, player_index=1):
+        for i in range(self.players[player_index].count_cards_in_hand()):
+            if self.play_card(player_index, i):
                 if self.is_color_changed:
                     color = random.choice(self.deck.colors[:-1])
                     self.change_color(color)
                 return
-        self.draw_card(1)           
+        self.draw_card(player_index)           
     
 if __name__ == "__main__":
     game = Game()
