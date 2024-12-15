@@ -30,3 +30,24 @@ class Player:
     
     def count_cards_in_hand(self):
         return len(self.cards_in_hand)
+    
+    def count_special_cards(self):
+        special_counts = {"Skip" : 0, "Draw Two" : 0, "Wild Draw Four" : 0, "Wild" : 0}
+        for card in self.cards_in_hand:
+            if card.value in special_counts:
+                special_counts[card.value] += 1
+        total = sum(special_counts.values())
+        return total
+    
+    def count_color(self):
+        color_counts = {"Red" : 0, "Blue" : 0, "Green" : 0, "Yellow" : 0, "All" : 0}
+
+        for card in self.cards_in_hand:
+            if card.color in color_counts:
+                color_counts[card.color] += 1
+        self.color_counts = color_counts
+        return color_counts
+    
+    def get_most_common_color(self):
+        color = self.count_color()
+        return max(color, key=color.get)
