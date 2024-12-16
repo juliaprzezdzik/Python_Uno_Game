@@ -26,6 +26,8 @@ COLORS = {
 CP_WIDTH = 300
 CP_HEIGHT = 300
 FONT = pygame.font.SysFont("Arial", 20)
+AVATAR_SIZE = 100
+AVATAR_MARGIN = 50
 
 def display_start_menu():
     screen.fill(WHITE)
@@ -74,17 +76,21 @@ def display_player_hand(y, player, is_visible=True, disable_highlight=False):
     num_cards = len(player.cards_in_hand)
     if num_cards == 0:
         return None
-    total_width = num_cards * CARD_WIDTH + (num_cards - 1)
-    starting_x = (WIDTH - total_width) // 2
+    max_width = WIDTH - AVATAR_SIZE - AVATAR_MARGIN - 20
+    card_spacing = CARD_WIDTH
+    if (num_cards - 1) * CARD_WIDTH + CARD_WIDTH > max_width:
+        card_spacing = (max_width - CARD_WIDTH) / (num_cards - 1)
+    total_width = (num_cards - 1) * card_spacing + CARD_WIDTH
+    starting_x = (WIDTH - total_width - (AVATAR_SIZE + AVATAR_MARGIN)) // 2
     mouse_pos = pygame.mouse.get_pos()
     highlighted_card = None
     for i in range(num_cards):
-        card_rect = pygame.Rect(starting_x + i * CARD_WIDTH , y, CARD_WIDTH, CARD_HEIGHT)
+        card_rect = pygame.Rect(starting_x + i * card_spacing, y, CARD_WIDTH, CARD_HEIGHT)
         if card_rect.collidepoint(mouse_pos):
             highlighted_card = i
             break
     for i in range(num_cards):
-        x = starting_x + i * CARD_WIDTH
+        x = starting_x + i * card_spacing
         is_highlighted = i == highlighted_card and is_visible
         draw_y = y - POP_OUT_OFFSET if is_highlighted else y
         if is_visible:
@@ -110,11 +116,11 @@ def draw_player_avatar(player_num, y_position):
         avatar_image = pygame.image.load('../assets/avatar1.jpg')
     else:
         avatar_image = pygame.image.load('../assets/avatar2.jpg')
-    avatar_image = pygame.transform.scale(avatar_image, (100, 100))
-    avatar_rect = pygame.Rect(WIDTH - 150, y_position, 100, 100)
+    avatar_image = pygame.transform.scale(avatar_image, (AVATAR_SIZE, AVATAR_SIZE))
+    avatar_rect = pygame.Rect(WIDTH - AVATAR_MARGIN - AVATAR_SIZE, y_position, AVATAR_SIZE, AVATAR_SIZE)
     background.blit(avatar_image, avatar_rect)
     player_text = FONT.render(f"Player {player_num + 1}", True, WHITE)
-    text_rect = player_text.get_rect(center=(WIDTH - 100, y_position + 110))
+    text_rect = player_text.get_rect(center=(WIDTH - AVATAR_SIZE, y_position + AVATAR_SIZE + 10))
     background.blit(player_text, text_rect)
     return background
 
