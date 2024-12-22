@@ -8,7 +8,7 @@ pygame.init()
 CARD_WIDTH, CARD_HEIGHT = 100, 150
 POP_OUT_OFFSET = CARD_HEIGHT*5/8
 
-background_image = pygame.image.load('../assets/table.jpg') #NIE WIEM CZY WYWALIC
+background_image = pygame.image.load('../assets/table.jpg')
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 HIGHLIGHT = (200, 200, 0)
@@ -241,7 +241,6 @@ def run():
             pygame.event.clear()
             pause_after_card = False
             game.track_turn()
-
         if game.count_turn == 0 and not pause_after_card:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -283,5 +282,4 @@ def run():
         pygame.quit()
 
 if __name__ == "__main__":
-    start_menu()
     run()
