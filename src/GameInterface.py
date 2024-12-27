@@ -4,6 +4,7 @@ from Game import Game
 pygame.init()
 
 CARD_WIDTH, CARD_HEIGHT = 100, 150
+MIN_WIDTH, MIN_HEIGHT = 100, 150
 POP_OUT_OFFSET = CARD_HEIGHT * 5 / 8
 
 background_image = pygame.image.load('../assets/table.jpg')
@@ -47,7 +48,8 @@ def start_menu():
                 pygame.quit()
                 exit()
             elif event.type == pygame.VIDEORESIZE:
-                width, height = event.w, event.h
+                width = max(event.w, MIN_WIDTH)
+                height = max(event.h, MIN_HEIGHT)
                 screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if start_button_rect.collidepoint(event.pos):
@@ -191,6 +193,13 @@ def display_uno_button(screen, width, height):
         return True
     return False
 
+def display_timer(screen, elapsed_time, width):
+    minutes = elapsed_time // 60
+    seconds = elapsed_time % 60
+    time_text = FONT.render(f"Time: {minutes:02}:{seconds:02}", True, WHITE)
+    time_rect = time_text.get_rect(topright=(width - 20, 10))  # Wyświetl w prawym górnym rogu
+    screen.blit(time_text, time_rect)
+
 def run():
     width, height = start_menu()
     screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
@@ -201,12 +210,15 @@ def run():
     is_running = True
     pause_after_card = False
     background_surface, avatar1, avatar2 = read_background(width, height)
+    start_time = pygame.time.get_ticks()
     while game.check_winner() is None and is_running:
+        elapsed_time = (pygame.time.get_ticks() - start_time) // 1000
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 is_running = False
             elif event.type == pygame.VIDEORESIZE:
-                width, height = event.w, event.h
+                width = max(event.w, MIN_WIDTH)
+                height = max(event.h, MIN_HEIGHT)
                 screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
                 background_surface, avatar1, avatar2 = read_background(width, height)
         screen.blit(background_surface, (0, 0))
@@ -216,6 +228,7 @@ def run():
         display_player_hand(screen, width, 20, game.players[1], is_visible=False)
         highlighted_card = display_player_hand(screen, width, height - CARD_HEIGHT - 20, game.players[0])
         is_draw_pile_clicked = display_and_check_deck(screen, width, height, game.deck)
+        display_timer(screen, elapsed_time, width)
         if pause_after_card:
             is_draw_pile_clicked = display_and_check_deck(screen, width, height, game.deck, True)
             highlighted_card = display_player_hand(screen, width, height - CARD_HEIGHT - 20, game.players[0], True)
@@ -258,6 +271,7 @@ def run():
                                     display_player_hand(screen, width, 20, game.players[1], is_visible=False)
                                     display_player_hand(screen, width, height - CARD_HEIGHT - 20, game.players[0])
                                     display_and_check_deck(screen, width, height, game.deck)
+                                    display_timer(screen, elapsed_time, width)
                                     mid_x = width // 2
                                     mid_y = height // 2
                                     picker_rect = pygame.Rect(
