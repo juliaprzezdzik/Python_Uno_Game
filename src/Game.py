@@ -1,4 +1,4 @@
-from Deck import Card, Deck
+from Deck import Deck
 from Player import Player
 import logging
 import random
@@ -33,9 +33,10 @@ class Game:
             for _ in range(num_cards):
                 if not self.deck.is_empty():
                     player.draw_card(self.deck)
+            player.sort_cards_in_hand()
     
     def is_valid_move(self, card, top_card):
-        if self.next_player_takes_cards == True:
+        if self.next_player_takes_cards:
             if card.value in ["Wild Draw Four","Draw Two"]:
                 return True
             else:
@@ -50,6 +51,7 @@ class Game:
         player = self.players[player_index]
         for _ in range( 1 + self.bonus_number_of_cards_to_draw):
             player.draw_card(self.deck)
+        player.sort_cards_in_hand()
         self.bonus_number_of_cards_to_draw = 0
         self.next_player_takes_cards = False
 
@@ -112,7 +114,7 @@ class Game:
 if __name__ == "__main__":
     game = Game()
     game.start_game()
-    while game.check_winner() == None:
+    while game.check_winner() is None:
         print("The top of the stack: ")
         print(game.deck.get_top_discarded_card())
         print("Your turn!")
