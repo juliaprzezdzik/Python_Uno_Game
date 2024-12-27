@@ -20,7 +20,10 @@ class Player:
             
     def if_uno(self):
         return len(self.cards_in_hand) == 1
-        
+
+    def if_last_move(self):
+        return len(self.cards_in_hand) == 2
+
     def sort_cards_in_hand(self):
         self.cards_in_hand.sort(key=lambda card: (card.color, card.value))
     
