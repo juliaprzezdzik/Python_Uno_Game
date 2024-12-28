@@ -4,7 +4,7 @@ from Game import Game
 pygame.init()
 
 CARD_WIDTH, CARD_HEIGHT = 100, 150
-MIN_WIDTH, MIN_HEIGHT = 100, 150
+MIN_WIDTH, MIN_HEIGHT = 600, 600
 POP_OUT_OFFSET = CARD_HEIGHT * 5 / 8
 
 background_image = pygame.image.load('../assets/table.jpg')
