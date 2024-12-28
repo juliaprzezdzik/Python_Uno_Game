@@ -137,7 +137,8 @@ def display_final_screen(screen, width, height, main_text, additional_text=None,
             elif event.type == pygame.KEYDOWN:
                 running = False
             elif event.type == pygame.VIDEORESIZE:
-                width, height = event.w, event.h
+                width = max(event.w, MIN_WIDTH)
+                height = max(event.h, MIN_HEIGHT)
                 screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
         screen.fill(rgb_color)
         text = FONT.render(main_text, True, WHITE)
@@ -197,7 +198,7 @@ def display_timer(screen, elapsed_time, width):
     minutes = elapsed_time // 60
     seconds = elapsed_time % 60
     time_text = FONT.render(f"Time: {minutes:02}:{seconds:02}", True, WHITE)
-    time_rect = time_text.get_rect(topright=(width - 20, 10))  # Wyświetl w prawym górnym rogu
+    time_rect = time_text.get_rect(topright=(width - 20, 10))
     screen.blit(time_text, time_rect)
 
 def run():
@@ -246,7 +247,8 @@ def run():
                         is_running = False
                         turn_still_going = False
                     elif event.type == pygame.VIDEORESIZE:
-                        width, height = event.w, event.h
+                        width = max(event.w, MIN_WIDTH)
+                        height = max(event.h, MIN_HEIGHT)
                         screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
                         background_surface, avatar1, avatar2 = read_background(width, height)
                     elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -291,7 +293,8 @@ def run():
                                             is_running = False
                                             color = "Red"
                                         elif ev.type == pygame.VIDEORESIZE:
-                                            width, height = ev.w, ev.h
+                                            width = max(ev.w, MIN_WIDTH)
+                                            height = max(ev.h, MIN_HEIGHT)
                                             screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
                                             background_surface, avatar1, avatar2 = read_background(width, height)
                                         elif ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
