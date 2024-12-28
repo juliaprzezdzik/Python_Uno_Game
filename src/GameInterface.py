@@ -198,7 +198,7 @@ def display_timer(screen, elapsed_time, width):
     minutes = elapsed_time // 60
     seconds = elapsed_time % 60
     time_text = FONT.render(f"Time: {minutes:02}:{seconds:02}", True, WHITE)
-    time_rect = time_text.get_rect(topright=(width - 20, 10))
+    time_rect = time_text.get_rect(topleft=(20, 10))
     screen.blit(time_text, time_rect)
 
 def run():
@@ -315,6 +315,7 @@ def run():
                 display_player_hand(screen, width, 20, game.players[1], is_visible=False)
                 highlighted_card = display_player_hand(screen, width, height - CARD_HEIGHT - 20, game.players[0])
                 is_draw_pile_clicked = display_and_check_deck(screen, width, height, game.deck)
+                display_timer(screen, elapsed_time, width)
                 if game.players[0].if_last_move() and not uno_pressed_this_turn and pause_after_card == False:
                     pressed = display_uno_button(screen, width, height)
                     if pressed:
