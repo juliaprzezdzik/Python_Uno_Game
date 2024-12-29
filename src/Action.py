@@ -1,4 +1,4 @@
-from GameState import GameState
+from src.GameState import GameState
 
 class Action:
     def __init__(self, state):

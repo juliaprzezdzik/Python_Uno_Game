@@ -1,4 +1,4 @@
-from GameInterface import run
+from src.GameInterface import run
 
 if __name__ == "__main__":
     run()

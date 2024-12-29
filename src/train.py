@@ -1,7 +1,7 @@
-from Game import Game
-from GameState import GameState
-from Agent import Agent
-from Action import Action
+from src.Game import Game
+from src.GameState import GameState
+from src.Agent import Agent
+from src.Action import Action
 
 def train_agent(episodes, agent):
     for episode in range(episodes):

@@ -1,7 +1,7 @@
 import torch as T
 import numpy as np
-from Model import DQN
-from ReplayBuffer import CustomReplayBuffer
+from src.Model import DQN
+from src.ReplayBuffer import CustomReplayBuffer
 
 class Agent():
     def __init__(self, gamma, epsilon, learning_rate, input_dims, batch_size, 
