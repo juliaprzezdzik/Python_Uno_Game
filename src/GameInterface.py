@@ -1,12 +1,11 @@
 import pygame
-from src.Deck import Card, Deck
-from src.Player import Player
 from src.Game import Game
 
 pygame.init()
 
 CARD_WIDTH, CARD_HEIGHT = 100, 150
-POP_OUT_OFFSET = CARD_HEIGHT*5/8
+MIN_WIDTH, MIN_HEIGHT = 600, 600
+POP_OUT_OFFSET = CARD_HEIGHT * 5 / 8
 
 background_image = pygame.image.load('../assets/table.jpg')
 WHITE = (255, 255, 255)
@@ -49,7 +48,8 @@ def start_menu():
                 pygame.quit()
                 exit()
             elif event.type == pygame.VIDEORESIZE:
-                width, height = event.w, event.h
+                width = max(event.w, MIN_WIDTH)
+                height = max(event.h, MIN_HEIGHT)
                 screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if start_button_rect.collidepoint(event.pos):
@@ -75,7 +75,7 @@ def draw_card(screen, card, x, y, disable_highlight, is_mouse_over=False, draw_p
     text_rect = text.get_rect(center=(x + CARD_WIDTH // 2, y + CARD_HEIGHT // 2))
     screen.blit(text, text_rect)
 
-def display_player_hand(screen, width, height, y, player, is_visible=True, disable_highlight=False):
+def display_player_hand(screen, width, y, player, is_visible=True, disable_highlight=False):
     num_cards = len(player.cards_in_hand)
     if num_cards == 0:
         return None
@@ -102,12 +102,11 @@ def display_player_hand(screen, width, height, y, player, is_visible=True, disab
             draw_card(screen, None, x, y, disable_highlight, draw_pile=True)
     return highlighted_card
 
-
 def display_and_check_deck(screen, width, height, deck, disable_highlight=False):
     x = (width - CARD_WIDTH) // 2
     y = (height - CARD_HEIGHT - 20) // 2
     mouse_pos = pygame.mouse.get_pos()
-    card_rect = pygame.Rect(x - CARD_WIDTH , y, CARD_WIDTH, CARD_HEIGHT)
+    card_rect = pygame.Rect(x - CARD_WIDTH, y, CARD_WIDTH, CARD_HEIGHT)
     is_mouse_over = card_rect.collidepoint(mouse_pos)
     draw_card(screen, None, x - CARD_WIDTH, y, disable_highlight, is_mouse_over, True)
     first_card = deck.get_top_discarded_card()
@@ -128,27 +127,28 @@ def draw_player_avatar(width, height, player_num, y_position):
     background.blit(player_text, text_rect)
     return background
 
-def display_victory_screen(screen, width, height):
-    screen.fill((0, 128, 0))
-    victory_text = FONT.render("You Win!", True, WHITE)
-    sub_text = FONT.render("Congratulations! Press any key to exit.", True, WHITE)
-    victory_text_rect = victory_text.get_rect(center=(width // 2, height // 2 - 50))
-    sub_text_rect = sub_text.get_rect(center=(width // 2, height // 2 + 20))
-    screen.blit(victory_text, victory_text_rect)
-    screen.blit(sub_text, sub_text_rect)
-    pygame.display.flip()
-    wait_for_exit()
-
-def display_loss_screen(screen, width, height):
-    screen.fill((128, 0, 0))
-    loss_text = FONT.render("You Lose!", True, WHITE)
-    sub_text = FONT.render("Better luck next time! Press any key to exit.", True, WHITE)
-    loss_text_rect = loss_text.get_rect(center=(width // 2, height // 2 - 50))
-    sub_text_rect = sub_text.get_rect(center=(width // 2, height // 2 + 20))
-    screen.blit(loss_text, loss_text_rect)
-    screen.blit(sub_text, sub_text_rect)
-    pygame.display.flip()
-    wait_for_exit()
+def display_final_screen(screen, width, height, main_text, additional_text=None, rgb_color=(0, 0, 0)):
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            elif event.type == pygame.KEYDOWN:
+                running = False
+            elif event.type == pygame.VIDEORESIZE:
+                width = max(event.w, MIN_WIDTH)
+                height = max(event.h, MIN_HEIGHT)
+                screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
+        screen.fill(rgb_color)
+        text = FONT.render(main_text, True, WHITE)
+        text_rect = text.get_rect(center=(width // 2, height // 2 - 50))
+        screen.blit(text, text_rect)
+        if additional_text:
+            sub_text = FONT.render(additional_text, True, WHITE)
+            sub_text_rect = sub_text.get_rect(center=(width // 2, height // 2 + 20))
+            screen.blit(sub_text, sub_text_rect)
+        pygame.display.flip()
 
 def wait_for_exit():
     waiting = True
@@ -157,9 +157,9 @@ def wait_for_exit():
             if event.type == pygame.QUIT or event.type == pygame.KEYDOWN:
                 waiting = False
 
-def draw_color(screen, color, x, y, disable_highlight = False):
+def draw_color(screen, color, x, y):
     mouse_pos = pygame.mouse.get_pos()
-    color_rect = pygame.Rect(x, y, CP_WIDTH//2, CP_HEIGHT//2)
+    color_rect = pygame.Rect(x, y, CP_WIDTH // 2, CP_HEIGHT // 2)
     is_mouse_over = color_rect.collidepoint(mouse_pos)
     pygame.draw.rect(screen, color, color_rect, border_radius=10)
     if is_mouse_over:
@@ -173,33 +173,33 @@ def draw_player_turn(screen, width, height, count_turn):
         avatar_rect = pygame.Rect(width - 150, 20, 100, 100)
     pygame.draw.rect(screen, HIGHLIGHT, avatar_rect, 5)
 
-def display_color_picker(screen, width, height):
-    mid_x = width // 2
-    mid_y = height // 2
-    color = None
-    picker_rect = pygame.Rect(mid_x - CP_WIDTH//2 - 15 , mid_y - CP_HEIGHT//2 - 15, CP_WIDTH + 30, CP_HEIGHT + 30)
-    pygame.draw.rect(screen, BLACK, picker_rect, border_radius=15)
-    red = draw_color(screen, COLORS["Red"], mid_x - CP_WIDTH//2 - 5, mid_y - CP_HEIGHT//2 - 5)
-    blue = draw_color(screen, COLORS["Blue"], mid_x + 5, mid_y - CP_HEIGHT//2 - 5)
-    yellow = draw_color(screen, COLORS["Yellow"], mid_x - CP_WIDTH//2 - 5, mid_y + 5)
-    green = draw_color(screen, COLORS["Green"], mid_x + 5, mid_y + 5)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-        elif event.type == pygame.VIDEORESIZE:
-            width, height = event.w, event.h
-            screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            if red:
-                color = "Red"
-            if blue:
-                color = "Blue"
-            if yellow:
-                color = "Yellow"
-            if green:
-                color = "Green"
-    return color
+def read_background(width, height):
+    background_surface = pygame.Surface((width, height))
+    background_surface.blit(pygame.transform.scale(background_image, (width, height)), (0, 0))
+    avatar1 = draw_player_avatar(width, height, 1, 20)
+    avatar2 = draw_player_avatar(width, height, 0, height - 120)
+    return background_surface, avatar1, avatar2
+
+def display_uno_button(screen, width, height):
+    button_width, button_height = 200, 70
+    button_rect = pygame.Rect(width - button_width - 20, height - button_height - AVATAR_SIZE - 50, button_width,
+                              button_height)
+    pygame.draw.rect(screen, (0, 0, 0), button_rect, border_radius=8)
+    uno_text = FONT.render("UNO!", True, (255, 255, 255))
+    uno_text_rect = uno_text.get_rect(center=button_rect.center)
+    screen.blit(uno_text, uno_text_rect)
+    mouse_pressed = pygame.mouse.get_pressed(num_buttons=3)
+    mouse_pos = pygame.mouse.get_pos()
+    if mouse_pressed[0] and button_rect.collidepoint(mouse_pos):
+        return True
+    return False
+
+def display_timer(screen, elapsed_time, width):
+    minutes = elapsed_time // 60
+    seconds = elapsed_time % 60
+    time_text = FONT.render(f"Time: {minutes:02}:{seconds:02}", True, WHITE)
+    time_rect = time_text.get_rect(topleft=(20, 10))
+    screen.blit(time_text, time_rect)
 
 def run():
     width, height = start_menu()
@@ -210,75 +210,131 @@ def run():
     selected_card = None
     is_running = True
     pause_after_card = False
-    color = None
-    background_surface = pygame.Surface((width, height))
-    background_surface.blit(pygame.transform.scale(background_image, (width, height)), (0, 0))
-    avatar1 = draw_player_avatar(width, height, 1, 20)
-    avatar2 = draw_player_avatar(width, height, 0, height - 120)
+    background_surface, avatar1, avatar2 = read_background(width, height)
+    start_time = pygame.time.get_ticks()
     while game.check_winner() is None and is_running:
+        elapsed_time = (pygame.time.get_ticks() - start_time) // 1000
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 is_running = False
             elif event.type == pygame.VIDEORESIZE:
-                width, height = event.w, event.h
+                width = max(event.w, MIN_WIDTH)
+                height = max(event.h, MIN_HEIGHT)
                 screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
-                background_surface = pygame.Surface((width, height))
-                background_surface.blit(pygame.transform.scale(background_image, (width, height)), (0, 0))
-                avatar1 = draw_player_avatar(width, height, 1, 20)
-                avatar2 = draw_player_avatar(width, height, 0, height - 120)
+                background_surface, avatar1, avatar2 = read_background(width, height)
         screen.blit(background_surface, (0, 0))
         screen.blit(avatar1, (0, 0))
         screen.blit(avatar2, (0, 0))
         draw_player_turn(screen, width, height, game.count_turn)
-        display_player_hand(screen, width, height, 20, game.players[1], is_visible=False)
-        highlighted_card = display_player_hand(screen, width, height, height - CARD_HEIGHT - 20, game.players[0])
+        display_player_hand(screen, width, 20, game.players[1], is_visible=False)
+        highlighted_card = display_player_hand(screen, width, height - CARD_HEIGHT - 20, game.players[0])
         is_draw_pile_clicked = display_and_check_deck(screen, width, height, game.deck)
+        display_timer(screen, elapsed_time, width)
         if pause_after_card:
             is_draw_pile_clicked = display_and_check_deck(screen, width, height, game.deck, True)
-            highlighted_card = display_player_hand(screen, width, height, height - CARD_HEIGHT - 20, game.players[0],True)
+            highlighted_card = display_player_hand(screen, width, height - CARD_HEIGHT - 20, game.players[0], True)
             pygame.display.flip()
             pygame.time.wait(500)
             pygame.event.clear()
             pause_after_card = False
             game.track_turn()
         if game.count_turn == 0 and not pause_after_card:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    is_running = False
-                elif event.type == pygame.VIDEORESIZE:
-                    width, height = event.w, event.h
-                    screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
-                    background_surface = pygame.Surface((width, height))
-                    background_surface.blit(pygame.transform.scale(background_image, (width, height)), (0, 0))
-                    avatar1 = draw_player_avatar(width, height, 1, 20)
-                    avatar2 = draw_player_avatar(width, height, 0, height - 120)
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    if highlighted_card is not None:
-                        selected_card = highlighted_card
-                    if event.button == 1:
-                        if selected_card is not None and game.play_card(0, selected_card):
-                            selected_card = None
-                            pause_after_card = True
-                        if is_draw_pile_clicked:
-                            game.draw_card(0)
-                            pause_after_card = True
-                        if game.is_color_changed:
-                            pause_after_card = False
-                            while color is None:
-                                color = display_color_picker(screen, width, height)
-                                pygame.display.flip()
-                            game.change_color(color)
-                            pause_after_card = True
-                            color = None
+            uno_pressed_this_turn = False
+            turn_still_going = True
+            while turn_still_going:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        is_running = False
+                        turn_still_going = False
+                    elif event.type == pygame.VIDEORESIZE:
+                        width = max(event.w, MIN_WIDTH)
+                        height = max(event.h, MIN_HEIGHT)
+                        screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
+                        background_surface, avatar1, avatar2 = read_background(width, height)
+                    elif event.type == pygame.MOUSEBUTTONDOWN:
+                        if highlighted_card is not None:
+                            selected_card = highlighted_card
+                        if event.button == 1:
+                            if selected_card is not None and game.play_card(0, selected_card):
+                                selected_card = None
+                                pause_after_card = True
+                                turn_still_going = False
+                            if is_draw_pile_clicked:
+                                game.draw_card(0)
+                                pause_after_card = True
+                                turn_still_going = False
+                            if game.is_color_changed:
+                                color = None
+                                while color is None:
+                                    screen.blit(background_surface, (0, 0))
+                                    screen.blit(avatar1, (0, 0))
+                                    screen.blit(avatar2, (0, 0))
+                                    draw_player_turn(screen, width, height, game.count_turn)
+                                    display_player_hand(screen, width, 20, game.players[1], is_visible=False)
+                                    display_player_hand(screen, width, height - CARD_HEIGHT - 20, game.players[0])
+                                    display_and_check_deck(screen, width, height, game.deck)
+                                    display_timer(screen, elapsed_time, width)
+                                    mid_x = width // 2
+                                    mid_y = height // 2
+                                    picker_rect = pygame.Rect(
+                                        mid_x - CP_WIDTH // 2 - 15,
+                                        mid_y - CP_HEIGHT // 2 - 15,
+                                        CP_WIDTH + 30,
+                                        CP_HEIGHT + 30
+                                    )
+                                    pygame.draw.rect(screen, BLACK, picker_rect, border_radius=15)
+                                    red_hover = draw_color(screen, COLORS["Red"], mid_x - CP_WIDTH // 2 - 5, mid_y - CP_HEIGHT // 2 - 5)
+                                    blue_hover = draw_color(screen, COLORS["Blue"], mid_x + 5, mid_y - CP_HEIGHT // 2 - 5)
+                                    yellow_hover = draw_color(screen, COLORS["Yellow"], mid_x - CP_WIDTH // 2 - 5, mid_y + 5)
+                                    green_hover = draw_color(screen, COLORS["Green"], mid_x + 5, mid_y + 5)
+                                    pygame.display.flip()
+                                    for ev in pygame.event.get():
+                                        if ev.type == pygame.QUIT:
+                                            is_running = False
+                                            color = "Red"
+                                        elif ev.type == pygame.VIDEORESIZE:
+                                            width = max(ev.w, MIN_WIDTH)
+                                            height = max(ev.h, MIN_HEIGHT)
+                                            screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
+                                            background_surface, avatar1, avatar2 = read_background(width, height)
+                                        elif ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
+                                            if red_hover:
+                                                color = "Red"
+                                            elif blue_hover:
+                                                color = "Blue"
+                                            elif yellow_hover:
+                                                color = "Yellow"
+                                            elif green_hover:
+                                                color = "Green"
+                                game.change_color(color)
+                                pause_after_card = True
+                screen.blit(background_surface, (0, 0))
+                screen.blit(avatar1, (0, 0))
+                screen.blit(avatar2, (0, 0))
+                draw_player_turn(screen, width, height, game.count_turn)
+                display_player_hand(screen, width, 20, game.players[1], is_visible=False)
+                highlighted_card = display_player_hand(screen, width, height - CARD_HEIGHT - 20, game.players[0])
+                is_draw_pile_clicked = display_and_check_deck(screen, width, height, game.deck)
+                display_timer(screen, elapsed_time, width)
+                if game.players[0].if_last_move() and not uno_pressed_this_turn and pause_after_card == False:
+                    pressed = display_uno_button(screen, width, height)
+                    if pressed:
+                        uno_pressed_this_turn = True
+                pygame.display.flip()
+                if not is_running or pause_after_card:
+                    turn_still_going = False
+            if game.players[0].if_uno() and not uno_pressed_this_turn:
+                for _ in range(3):
+                    game.draw_card(0)
         else:
             game.random_move()
             pause_after_card = True
         pygame.display.flip()
     if game.check_winner() == game.players[0]:
-        display_victory_screen(screen, width, height)
+        display_final_screen(screen, width, height, "You Win!", "Congratulations! Press any key to exit.", (0, 128, 0))
         pygame.quit()
     else:
-        display_loss_screen(screen, width, height)
+        display_final_screen(screen, width, height, "You Lose!", "Better luck next time! Press any key to exit.", (128, 0, 0))
         pygame.quit()
 
 if __name__ == "__main__":
