@@ -52,7 +52,7 @@ if __name__ == "__main__":
         writer = csv.writer(file, delimiter=" ")
         headers = list(states_dict.keys())
         writer.writerow(headers)
-        writer.writerows(first_100_states)
+        writer.writerows(first_50_states)
 
     print(f"Liczba wygenerowanych stanów: {len(all_states)}")
     print(f"Stany zapisano do pliku: {filename}")
