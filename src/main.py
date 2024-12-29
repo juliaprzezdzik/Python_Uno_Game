@@ -1,4 +1,4 @@
-from GameInterface import start_menu, run
+from GameInterface import run
 
 if __name__ == "__main__":
     run()
