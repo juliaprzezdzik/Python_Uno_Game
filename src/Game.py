@@ -1,5 +1,5 @@
-from Deck import Card, Deck
-from Player import Player
+from src.Deck import Card, Deck
+from src.Player import Player
 import logging
 import random
 
@@ -107,8 +107,8 @@ class Game:
                     color = random.choice(self.deck.colors[:-1])
                     self.change_color(color)
                 return
-        self.draw_card(1)           
-    
+        self.draw_card(1)
+
 if __name__ == "__main__":
     game = Game()
     game.start_game()

@@ -1,7 +1,7 @@
 import pygame
-from Deck import Card, Deck
-from Player import Player
-from Game import Game
+from src.Deck import Card, Deck
+from src.Player import Player
+from src.Game import Game
 
 pygame.init()
 
