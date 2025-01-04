@@ -42,7 +42,6 @@ class CustomReplayBuffer:
 
     def plot_reward_distribution(self):
         if len(self.storage) == 0:
-            print("No data to visualize rewards.")
             return
         rewards = [transition['reward'].item() for transition in self.storage]
         plt.figure(figsize=(10, 6))
@@ -82,7 +81,6 @@ class CustomReplayBuffer:
 
     def plot_action_distribution(self):
         if len(self.storage) == 0:
-            print("Buffer is empty.")
             return
         actions = [transition['action'].item() for transition in self.storage]
         action_counts = {}
@@ -100,7 +98,6 @@ class CustomReplayBuffer:
 
     def visualize_rewards_distribution(self):
         if len(self.storage) == 0:
-            print("Buffer is empty.")
             return
         rewards = [transition['reward'].item() for transition in self.storage]
         plt.figure(figsize=(8, 5))
@@ -112,11 +109,7 @@ class CustomReplayBuffer:
         plt.show()
 
     def visualize_transitions(self, num_samples=3):
-        if len(self.storage) == 0:
-            print("Buffer is empty.")
-            return
-        if self.state_dim <= 1:
-            print("state_dim must have value greater than 1.")
+        if len(self.storage) == 0 or self.state_dim <= 1:
             return
         sample_indices = random.sample(range(len(self.storage)), min(num_samples, len(self.storage)))
         transitions = [self.storage[idx] for idx in sample_indices]
