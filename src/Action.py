@@ -1,6 +1,5 @@
 from src.GameState import GameState
 
-
 class Action:
     def __init__(self, state):
         self.game_state = state

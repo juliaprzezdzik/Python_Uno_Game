@@ -1,10 +1,28 @@
 import pandas as pd
 import random
+import matplotlib.pyplot as plt
 from src.QLearning.Environment import Environment
-from Rewards import states, actions
+from src.QLearning.Rewards import states, actions
+
+def plot_training_results(total_rewards, episode_lengths):
+    episodes = range(len(total_rewards))
+    plt.figure(figsize=(12, 6))
+    plt.plot(episodes, total_rewards, label='Total Reward')
+    plt.xlabel('Episodes')
+    plt.ylabel('Total Reward')
+    plt.title('Total Reward per Episode')
+    plt.legend()
+    plt.show()
+    plt.figure(figsize=(12, 6))
+    plt.plot(episodes, episode_lengths, label='Episode Length')
+    plt.xlabel('Episodes')
+    plt.ylabel('Episode Length')
+    plt.title('Episode Length per Episode')
+    plt.legend()
+    plt.show()
 
 class QLearningAgent:
-    def __init__(self, states, actions, alpha=0.1, gamma=0.9, epsilon=0.1):
+    def __init__(self, states, actions, environment, alpha=0.1, gamma=0.9, epsilon=0.1):
         self.states = states
         self.actions = actions
         self.environment = environment
@@ -26,10 +44,12 @@ class QLearningAgent:
         valid_actions = [action for action in self.actions if self.environment.is_valid_action(action)]
         if not valid_actions:
             return "Draw Card"
-        if random.uniform(0, 1) < self.epsilon:
+        try:
+            q_values = self.q_table.loc[state, valid_actions]
+            return q_values.idxmax()
+        except KeyError:
+            print(f"[WARN] State {state} not in Q-table! Falling back to random valid action.")
             return random.choice(valid_actions)
-        q_values = self.q_table.loc[state, valid_actions]
-        return q_values.idxmax()
 
     def update_q_value(self, state, action, reward, next_state):
         max_next_q = self.q_table.loc[next_state].max()
@@ -41,28 +61,31 @@ class QLearningAgent:
         self.q_table.to_csv(filename)
         print(f"Q-table saved to {filename}")
 
-    def train(self, episodes, environment, save_interval=100, filename="q_table.csv"):
+    def train(self, episodes, environment, save_interval=100, filename="q_table.csv", max_steps=500):
+        total_rewards = []
+        episode_lengths = []
         for episode in range(episodes):
             self.epsilon = max(0.1, self.epsilon * 0.99)
             state = environment.reset()
             done = False
             total_reward = 0
             steps = 0
-            # max_steps = 1000
-            # while not done and steps < max_steps:
-            steps += 1
-            action = self.choose_action(state)
-            next_state, reward, done = environment.step(action)
-            self.update_q_value(state, action, reward, next_state)
-            state = next_state
-            total_reward += reward
-            # if steps == max_steps:
-            #     print(f"Warning: Episode {episode} reached maximum steps!")
+            while not done and steps < max_steps:
+                steps += 1
+                action = self.choose_action(state)
+                next_state, reward, done = environment.step(action)
+                self.update_q_value(state, action, reward, next_state)
+                state = next_state
+                total_reward += reward
+            total_rewards.append(total_reward)
+            episode_lengths.append(steps)
             if episode % save_interval == 0:
                 self.save_q_table_to_csv(filename)
                 print(f"Episode {episode}/{episodes}, Total Reward: {total_reward}, Epsilon: {self.epsilon:.4f}")
         self.save_q_table_to_csv(filename)
         print(f"Training complete. Q-table saved to {filename}")
+        return total_rewards, episode_lengths
+
 
 if __name__ == "__main__":
     possible_states, states_dict = states(sample_size=100)
@@ -71,8 +94,11 @@ if __name__ == "__main__":
     agent = QLearningAgent(
         states=possible_states,
         actions=possible_actions,
+        environment=environment,
         alpha=0.9,
         gamma=0.9,
         epsilon=0.9
     )
-    agent.train(episodes=10000, environment=environment, save_interval=100, filename="q_table.csv")
+
+    total_rewards, episode_lengths = agent.train(episodes=1000, environment=environment, save_interval=10, filename="q_table.csv")
+    plot_training_results(total_rewards, episode_lengths)

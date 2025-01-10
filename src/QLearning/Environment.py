@@ -30,39 +30,31 @@ class Environment:
         return False
 
     def step(self, action):
-        if not self.is_valid_action(action):
-            reward = -20
-            print(f"Invalid action: {action}, Current state: {self.current_state}")
-            return self.current_state, reward, False
+        valid_actions = [a for a in self.actions if self.is_valid_action(a)]
+        can_play_card = len(valid_actions) > 0
         next_state = random.choice(self.states)
         total_cards_in_hand = sum(self.current_state[:4]) + sum(self.current_state[4:8])
         opponent_cards = self.current_state[-1]
         reward = 0
+        if action == "Draw Card" and can_play_card:
+            reward -= 5
         if total_cards_in_hand == 0:
-            reward = 10
+            reward += 50
         elif opponent_cards == 0:
-            reward = -10
+            reward -= 10
         elif opponent_cards == 1:
             if "Draw Two" in action or "Draw Four" in action:
-                reward = 3
+                reward += 3
             else:
-                reward = -1
+                reward -= 1
         elif opponent_cards <= 2:
             if "Draw Two" in action or "Wild Draw Four" in action:
                 reward = 2
         if total_cards_in_hand == 1:
             reward += 3
         reward += max(0, 5 - total_cards_in_hand)
-        if action == "Draw Card":
-            reward -= 1
-        elif action == "Play Wild":
-            reward += 0.6
-        elif action == "Play Wild Draw Four":
-            reward += 1.5
-        elif "Draw Two" in action:
-            reward += 0.7
-        elif "Skip" in action:
-            reward += 2
+        if "Skip" in action:
+            reward += 5
         self.current_state = next_state
         done = total_cards_in_hand == 0 or opponent_cards == 0
         print(f"Action: {action}, Reward: {reward}, Done: {done}, Next state: {next_state}")

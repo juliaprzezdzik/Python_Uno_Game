@@ -1,5 +1,162 @@
 import pygame
+import pandas as pd
 from src.Game import Game
+from QLearning.QAgent import QLearningAgent
+from QLearning.Rewards import states, actions
+from QLearning.Environment import Environment
+
+def load_q_agent():
+    possible_states, states_dict = states()
+    possible_actions = actions()
+    environment = Environment(possible_states, possible_actions)
+    environment.reset()
+    q_agent = QLearningAgent(
+        states=possible_states,
+        actions=possible_actions,
+        environment=environment,
+        alpha=0.1,
+        gamma=0.9,
+        epsilon=0.0
+    )
+    q_table_df = pd.read_csv("QLearning/q_table.csv", index_col=list(range(17)))
+    q_agent.q_table = q_table_df
+
+    return q_agent
+
+def map_game_to_q_state(game):
+    bot_player = game.players[1]
+    opponent_player = game.players[0]
+    red_count = 0
+    green_count = 0
+    blue_count = 0
+    yellow_count = 0
+    red_skip = 0
+    green_skip = 0
+    blue_skip = 0
+    yellow_skip = 0
+    red_draw_two = 0
+    green_draw_two = 0
+    blue_draw_two = 0
+    yellow_draw_two = 0
+    wild_count = 0
+    wild_draw4_count = 0
+    for card in bot_player.cards_in_hand:
+        ccolor = card.color
+        cvalue = card.value
+        if ccolor == "Red":
+            if cvalue == "Skip":
+                red_skip += 1
+            elif cvalue == "Draw Two":
+                red_draw_two += 1
+            else:
+                red_count += 1
+        elif ccolor == "Green":
+            if cvalue == "Skip":
+                green_skip += 1
+            elif cvalue == "Draw Two":
+                green_draw_two += 1
+            else:
+                green_count += 1
+        elif ccolor == "Blue":
+            if cvalue == "Skip":
+                blue_skip += 1
+            elif cvalue == "Draw Two":
+                blue_draw_two += 1
+            else:
+                blue_count += 1
+        elif ccolor == "Yellow":
+            if cvalue == "Skip":
+                yellow_skip += 1
+            elif cvalue == "Draw Two":
+                yellow_draw_two += 1
+            else:
+                yellow_count += 1
+        elif ccolor == "All":
+            if cvalue == "Wild Draw Four":
+                wild_draw4_count += 1
+            else:
+                wild_count += 1
+    top_card = game.deck.get_top_discarded_card()
+    if top_card is None:
+        top_color = "Red"
+        top_value = "0"
+    else:
+        top_color = top_card.color
+        top_value = top_card.value
+    color_map = {"Red": 0, "Green": 1, "Blue": 2, "Yellow": 3, "All": 3}  # "All" - jak Wild - niby 3?
+    top_card_color_idx = color_map.get(top_color, 0)
+    value_map = {
+        "0": 0, "1": 1, "2": 2, "3": 3, "4": 4,
+        "5": 5, "6": 6, "7": 7, "8": 8, "9": 9,
+        "Skip": 10,
+        "Draw Two": 11,
+        "Wild": 12,
+        "Wild Draw Four": 13
+    }
+    top_card_value_idx = value_map.get(top_value, 0)
+    opponent_cards = opponent_player.count_cards_in_hand()
+    q_state = (
+        red_count, green_count, blue_count, yellow_count,
+        red_skip, green_skip, blue_skip, yellow_skip,
+        red_draw_two, green_draw_two, blue_draw_two, yellow_draw_two,
+        wild_count, wild_draw4_count,
+        top_card_color_idx,
+        top_card_value_idx,
+        opponent_cards
+    )
+    return q_state
+
+def bot_qlearning_move(game, q_agent):
+    q_state = map_game_to_q_state(game)
+    chosen_action = q_agent.choose_action(q_state)
+    bot_player = game.players[1]
+    if chosen_action == "Draw Card":
+        game.draw_card(1)
+        return
+    if chosen_action.startswith("Play"):
+        parts = chosen_action.split()
+        if len(parts) == 2:
+            color = parts[1]
+            value = None
+        elif len(parts) == 3:
+            color = parts[1]
+            value = parts[2]
+        else:
+            color = "All"
+            value = "Wild"
+            if "Four" in chosen_action:
+                value = "Wild Draw Four"
+        card_index_to_play = None
+        for i, card in enumerate(bot_player.cards_in_hand):
+            if value is None:
+                if card.color == color:
+                    card_index_to_play = i
+                    break
+            else:
+                if card.color == color and card.value == value:
+                    card_index_to_play = i
+                    break
+        if card_index_to_play is not None:
+            success = game.play_card(1, card_index_to_play)
+            if success:
+                if game.is_color_changed:
+                    new_color = choose_first_color_from_hand(bot_player)
+                    game.change_color(new_color)
+                return
+            else:
+                game.draw_card(1)
+                return
+        else:
+            game.draw_card(1)
+            return
+    game.draw_card(1)
+
+
+def choose_first_color_from_hand(bot_player):
+    for card in bot_player.cards_in_hand:
+        if card.color in ["Red", "Green", "Blue", "Yellow"]:
+            return card.color
+    return "Red"
 
 pygame.init()
 
@@ -212,6 +369,7 @@ def run():
     pause_after_card = False
     background_surface, avatar1, avatar2 = read_background(width, height)
     start_time = pygame.time.get_ticks()
+    q_agent = load_q_agent()
     while game.check_winner() is None and is_running:
         elapsed_time = (pygame.time.get_ticks() - start_time) // 1000
         for event in pygame.event.get():
@@ -327,7 +485,7 @@ def run():
                 for _ in range(3):
                     game.draw_card(0)
         else:
-            game.random_move()
+            bot_qlearning_move(game, q_agent)
             pause_after_card = True
         pygame.display.flip()
     if game.check_winner() == game.players[0]:
