@@ -53,7 +53,7 @@ class CustomReplayBuffer:
     def update_priorities(self, indices, new_priorities):
         for idx, prio in zip(indices, new_priorities):
             self.storage[idx]["priority"] = torch.tensor(prio, dtype=torch.float32)
-
+'''
 if __name__ == "__main__":
     buffer = CustomReplayBuffer(max_size=10000, state_dim=4, n_actions=2)
     for _ in range(1000):
@@ -80,3 +80,4 @@ if __name__ == "__main__":
     print("\nUpdated priorities based on absolute reward + 0.01")
     for i, idx in enumerate(samples_priority['indices']):
         print(f"Index {idx}, new priority = {buffer.storage[idx]['priority'].item():.2f}")
+'''
