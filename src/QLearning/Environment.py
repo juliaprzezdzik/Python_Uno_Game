@@ -1,15 +1,19 @@
 import random
-from src.Deck import Card
-from src.Game import Game
+from Deck import Card
+from Game import Game
 
 class Environment:
     def __init__(self, states, actions):
         self.states = states
         self.actions = actions
         self.current_state = None
+        self.current_player = 0
         self.colors = ["Red", "Green", "Blue", "Yellow"]
         self.values = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "Skip", "Draw Two", "Wild", "Wild Draw Four"]
         self.game = Game()
+        
+    def switch_player(self):
+        self.current_player = 1 - self.current_player
 
     def reset(self):
         self.current_state = random.choice(self.states)
@@ -64,6 +68,7 @@ class Environment:
         elif "Skip" in action:
             reward += 2
         self.current_state = next_state
+        self.switch_player()
         done = total_cards_in_hand == 0 or opponent_cards == 0
         print(f"Action: {action}, Reward: {reward}, Done: {done}, Next state: {next_state}")
         return next_state, reward, done
