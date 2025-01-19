@@ -1,7 +1,66 @@
 import pandas as pd
 import random
-from src.QLearning.Environment import Environment
+from Environment import Environment
 from Rewards import states, actions
+import matplotlib.pyplot as plt
+
+
+def train_agents(episodes, environment, agent_A, agent_B, save_interval=100, filename_A="q_table_A.csv",
+                 filename_B="q_table_B.csv"):
+    rewards_A = []
+    rewards_B = []
+    max_steps = 1000
+    for episode in range(episodes):
+        agent_A.epsilon = max(0.1, agent_A.epsilon * 0.99)
+        agent_B.epsilon = max(0.1, agent_B.epsilon * 0.99)
+        state = environment.reset()
+        done = False
+        total_rewards = {0: 0, 1: 0}
+        steps = 0
+        while not done:
+            steps += 1
+            if steps > max_steps:
+                print(f"Epizod {episode} przerwany po {max_steps} krokach.")
+                break
+            if environment.current_player == 0:
+                current_agent = agent_A
+            else:
+                current_agent = agent_B
+            action = current_agent.choose_action(state)
+            next_state, reward, done = environment.step(action)
+            current_agent.update_q_value(state, action, reward, next_state)
+            state = next_state
+            total_rewards[environment.current_player] += reward
+        rewards_A.append(total_rewards[0])
+        rewards_B.append(total_rewards[1])
+        if episode % save_interval == 0:
+            agent_A.save_q_table_to_csv(filename_A)
+            agent_B.save_q_table_to_csv(filename_B)
+            print(f"Episode {episode}/{episodes}, Steps: {steps}, Rewards: A={total_rewards[0]}, B={total_rewards[1]}")
+    agent_A.save_q_table_to_csv(filename_A)
+    agent_B.save_q_table_to_csv(filename_B)
+    print(f"Training complete. Q-tables saved for both agents.")
+    plot_rewards(rewards_A, rewards_B)
+
+def plot_rewards(rewards_A, rewards_B):
+    plt.figure(figsize=(10, 6))
+    plt.plot(rewards_A, label="Agent A Rewards", color='blue')
+    plt.xlabel("Episodes")
+    plt.ylabel("Total Rewards")
+    plt.title("Rewards per Episode for aAgent")
+    plt.legend()
+    plt.grid()
+    plt.show()
+    plt.savefig("agent_a_rewards.png")
+    plt.figure(figsize=(10, 6))
+    plt.plot(rewards_B, label="Agent B Rewards", color='green')
+    plt.xlabel("Episodes")
+    plt.ylabel("Total Rewards")
+    plt.title("Rewards per Episode for b Agent")
+    plt.legend()
+    plt.grid()
+    plt.show()
+    plt.savefig("agent_b_rewards.png")
 
 class QLearningAgent:
     def __init__(self, states, actions, alpha=0.1, gamma=0.9, epsilon=0.1):
@@ -68,11 +127,19 @@ if __name__ == "__main__":
     possible_states, states_dict = states(sample_size=100)
     possible_actions = actions()
     environment = Environment(possible_states, possible_actions)
-    agent = QLearningAgent(
+    agent1 = QLearningAgent(
         states=possible_states,
         actions=possible_actions,
         alpha=0.9,
         gamma=0.9,
         epsilon=0.9
     )
-    agent.train(episodes=10000, environment=environment, save_interval=100, filename="q_table.csv")
+    agent2 = QLearningAgent(states=possible_states,
+        actions=possible_actions,
+        alpha=0.9,
+        gamma=0.9,
+        epsilon=0.9)
+    #agent.train(episodes=10000, environment=environment, save_interval=100, filename="q_table.csv")
+    train_agents(2000, environment, agent1, agent2)
+
+
