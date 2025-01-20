@@ -2,6 +2,8 @@ from src.Deck import Card, Deck
 from src.Player import Player
 import logging
 import random
+from src.DQN.Agent import Agent
+import numpy as np
 
 logging.basicConfig(level=logging.INFO)
 
@@ -60,6 +62,7 @@ class Game:
         top_card = self.deck.get_top_discarded_card()
         card = player.cards_in_hand[card_index]
         if self.is_valid_move(card, top_card):
+            self.last_played_card = top_card
             player.throw_card(card_index, self.deck)
             if card.value == "Draw Two":
                 self.bonus_number_of_cards_to_draw += 2
@@ -86,14 +89,13 @@ class Game:
         self.deck.shuffle()
         self.deal_cards(initial_hand_size)
         first_card = self.deck.get_first_card()
+        self.last_played_card = first_card
         self.deck.discard_card(first_card)
 
     def check_winner(self):
         for player in self.players:
             if len(player.cards_in_hand) == 0:
                 return player
-            elif len(self.deck.discarded) < 1:
-                return self.players[0]
         return None
     
     def take_your_turn(self):
@@ -111,9 +113,41 @@ class Game:
                     self.change_color(color)
                 return
         self.draw_card(player_index)
+    def get_current_state(self):
+        top_card = self.deck.get_top_discarded_card()
+        bot_hand = self.players[1].cards_in_hand
+        return np.array([top_card.color, top_card.value, len(bot_hand)])
+
+
+    def bot_move(self, player_index=1):
+        state = self.get_current_state()  # Musisz zdefiniować funkcję, która zwraca aktualny stan gry
+        action = agent.choose_action(state)
+        if action < len(self.players[player_index].cards_in_hand):
+            self.play_card(player_index, action)
+        else:
+            self.draw_card(player_index)
+
+
+    def check_playable_cards(self, player_index):
+        available_actions = []
+        available_cards = []
+        current_card = self.deck.get_top_discarded_card()
+        for index, card in enumerate(self.players[player_index].cards_in_hand):
+            if ((current_card.value == "Draw Two" or current_card.value == "Wild Draw Four") and self.next_player_takes_cards):
+                if card.value == "Draw Two" or card.value == "Wild Draw Four":
+                    available_actions.append(index)
+                    available_cards.append([index, card])  
+            elif card.value == self.deck.get_top_discarded_card().value or card.color == self.deck.get_top_discarded_card().color or card.value in self.deck.wild_cards:
+                available_actions.append(index)
+                available_cards.append([index, card])
+        available_actions.append(len(self.players[player_index].cards_in_hand))
+        available_cards.append([len(self.players[player_index].cards_in_hand), "DRAW CARD"])
+        return available_actions
               
 if __name__ == "__main__":
     game = Game()
+    agent = Agent(gamma=0.99, epsilon=0.1, lr=0.001, input_dims=(state_size,), batch_size=64, n_actions=action_space)
+    agent.load_model("trained_model.pth")
     game.start_game()
     while game.check_winner() is None:
         print("The top of the stack: ")
@@ -131,7 +165,7 @@ if __name__ == "__main__":
         print("The top of the stack: ")
         print(game.deck.get_top_discarded_card())
         print("My turn!")
-        if game.random_move():
+        if game.bot_move():
             print("I played '{played_card}'.\n".format(played_card=game.deck.get_top_discarded_card()))
         else:
             game.draw_card(1)
