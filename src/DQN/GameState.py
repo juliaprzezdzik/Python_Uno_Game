@@ -13,7 +13,7 @@ class GameState:
         self.most_common_color = player.get_most_common_color()
         
     def encode_state(self):
-        color_mapping = {"Red" : 0, "Blue" : 1, "Yellow" : 2, "Green" : 3, "All" : 5}
+        color_mapping = {"Red" : 0, "Blue" : 1, "Yellow" : 2, "Green" : 3, "All" : 4}
         value_mapping = {"0" : 0, "1" : 1, "2": 2, "3" : 3, "4" : 4, "5" : 5, "6" : 6, 
                         "7" : 7, "8" : 8, "9" : 9, "Skip" : 10, "Draw Two" : 11, "Wild" : 12, "Wild Draw Four": 13}      
         current_color = color_mapping.get(self.current_color, -1)
