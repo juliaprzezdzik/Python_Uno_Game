@@ -34,6 +34,9 @@ class Deck:
                 self.deck.append(Card(wild_card, self.colors[-1]))
 
     def shuffle(self):
+        for card in self.deck:
+            if card.value in self.wild_cards:
+                card.color = self.colors[-1]
         random.shuffle(self.deck)
 
     def is_empty(self):
