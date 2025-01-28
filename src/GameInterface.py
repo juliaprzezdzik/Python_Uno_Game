@@ -327,7 +327,7 @@ def run():
                 for _ in range(3):
                     game.draw_card(0)
         else:
-            game.random_move()
+            game.bot_move()
             pause_after_card = True
         pygame.display.flip()
     if game.check_winner() == game.players[0]:
