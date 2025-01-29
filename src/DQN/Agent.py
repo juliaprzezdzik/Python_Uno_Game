@@ -65,5 +65,4 @@ class Agent():
 
     def load_model(self, model_path):
         self.Q_eval.load_state_dict(T.load(model_path))
-        self.Q_eval.eval()  # Ustaw model w tryb ewaluacji
-        print(f"Model załadowany z pliku {model_path}")
+        self.Q_eval.eval()

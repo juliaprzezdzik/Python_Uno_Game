@@ -1,5 +1,7 @@
 import pygame
 from src.Game import Game
+from src.DQN.Agent import Agent
+from src.DQN.GameState import GameState
 
 pygame.init()
 
@@ -7,7 +9,7 @@ CARD_WIDTH, CARD_HEIGHT = 100, 150
 MIN_WIDTH, MIN_HEIGHT = 600, 600
 POP_OUT_OFFSET = CARD_HEIGHT * 5 / 8
 
-background_image = pygame.image.load('../assets/table.jpg')
+background_image = pygame.image.load('assets/table.jpg')
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 HIGHLIGHT = (200, 200, 0)
@@ -116,9 +118,9 @@ def display_and_check_deck(screen, width, height, deck, disable_highlight=False)
 def draw_player_avatar(width, height, player_num, y_position):
     background = pygame.Surface((width, height), pygame.SRCALPHA)
     if player_num == 1:
-        avatar_image = pygame.image.load('../assets/avatar1.jpg')
+        avatar_image = pygame.image.load('assets/avatar1.jpg')
     else:
-        avatar_image = pygame.image.load('../assets/avatar2.jpg')
+        avatar_image = pygame.image.load('assets/avatar2.jpg')
     avatar_image = pygame.transform.scale(avatar_image, (AVATAR_SIZE, AVATAR_SIZE))
     avatar_rect = pygame.Rect(width - AVATAR_MARGIN - AVATAR_SIZE, y_position, AVATAR_SIZE, AVATAR_SIZE)
     background.blit(avatar_image, avatar_rect)
@@ -207,6 +209,9 @@ def run():
     pygame.display.set_caption("UNO Card Interface")
     game = Game()
     game.start_game()
+    initial_state = GameState(game).encode_state()
+    agent = Agent(gamma=0.9, epsilon=0.0, learning_rate=0.001, input_dims=len(initial_state), batch_size=128, n_actions=100)
+    agent.load_model("models/dqn_model.pth")
     selected_card = None
     is_running = True
     pause_after_card = False
@@ -327,7 +332,7 @@ def run():
                 for _ in range(3):
                     game.draw_card(0)
         else:
-            game.bot_move()
+            game.bot_move(agent)
             pause_after_card = True
         pygame.display.flip()
     if game.check_winner() == game.players[0]:
@@ -336,6 +341,3 @@ def run():
     else:
         display_final_screen(screen, width, height, "You Lose!", "Better luck next time! Press any key to exit.", (128, 0, 0))
         pygame.quit()
-
-if __name__ == "__main__":
-    run()

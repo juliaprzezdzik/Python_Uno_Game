@@ -3,6 +3,7 @@ from src.Player import Player
 import logging
 import random
 from src.DQN.Agent import Agent
+from src.DQN.GameState import GameState
 import numpy as np
 
 logging.basicConfig(level=logging.INFO)
@@ -113,17 +114,15 @@ class Game:
                     self.change_color(color)
                 return
         self.draw_card(player_index)
-    def get_current_state(self):
-        top_card = self.deck.get_top_discarded_card()
-        bot_hand = self.players[1].cards_in_hand
-        return np.array([top_card.color, top_card.value, len(bot_hand)])
 
-
-    def bot_move(self, player_index=1):
-        state = self.get_current_state()  # Musisz zdefiniować funkcję, która zwraca aktualny stan gry
-        action = agent.choose_action(state)
+    def bot_move(self, agent, player_index=1):
+        state = GameState(self).encode_state()
+        available_actions = self.check_playable_cards(player_index=1)
+        action = agent.choose_action(state, available_actions)
         if action < len(self.players[player_index].cards_in_hand):
             self.play_card(player_index, action)
+            if self.is_color_changed:
+                self.change_color(self.players[1].get_most_common_color())
         else:
             self.draw_card(player_index)
 
@@ -143,34 +142,3 @@ class Game:
         available_actions.append(len(self.players[player_index].cards_in_hand))
         available_cards.append([len(self.players[player_index].cards_in_hand), "DRAW CARD"])
         return available_actions
-              
-if __name__ == "__main__":
-    game = Game()
-    agent = Agent(gamma=0.99, epsilon=0.1, lr=0.001, input_dims=(state_size,), batch_size=64, n_actions=action_space)
-    agent.load_model("trained_model.pth")
-    game.start_game()
-    while game.check_winner() is None:
-        print("The top of the stack: ")
-        print(game.deck.get_top_discarded_card())
-        print("Your turn!")
-        while True:
-            result = game.take_your_turn()
-            if result == -1:
-                game.draw_card(0)
-                print("You drew a card.\n")
-                break
-            elif game.play_card(0, result):
-                print("You played '{played_card}'.\n".format(played_card=game.deck.get_top_discarded_card()))
-                break
-        print("The top of the stack: ")
-        print(game.deck.get_top_discarded_card())
-        print("My turn!")
-        if game.bot_move():
-            print("I played '{played_card}'.\n".format(played_card=game.deck.get_top_discarded_card()))
-        else:
-            game.draw_card(1)
-            print("I drew a card.\n")
-    if game.check_winner == game.players[0]:
-        print("You won!")
-    else:
-        print("I won!")
