@@ -8,8 +8,8 @@ To run this project, you need:
 
 # Installation
 First, clone the repository:
-git clone https://github.com/juliaprzezdzik/Python_Uno_Game.git
-cd Python_Uno_Game
+- git clone https://github.com/juliaprzezdzik/Python_Uno_Game.git
+- cd Python_Uno_Game
 
 Then, install dependencies:
 - pip install .
