@@ -70,5 +70,5 @@ if __name__ == "__main__":
     )
 
     train_agent_with_plots(episodes=1500, agent=agent, opponent_agent=opponent_agent, update_target_every=50)
-    T.save(agent.Q_eval.state_dict(), "weights/dqn_model2.pth")
-    print("Model został zapisany w pliku dqn_model2.pth")
+    T.save(agent.Q_eval.state_dict(), "models/dqn_model2.pth")
+    print("The model has been saved to models/dqn_model2.pth")
