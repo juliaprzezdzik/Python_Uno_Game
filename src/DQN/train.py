@@ -55,18 +55,18 @@ if __name__ == "__main__":
     game.start_game()
     initial_state = GameState(game).encode_state()
     agent = Agent(
-        gamma=0.91,
+        gamma=0.9,
         epsilon=1.0,
-        learning_rate=0.0001,
+        learning_rate=0.00001,
         input_dims=len(initial_state),
         batch_size=128,
         n_actions=100,
-        max_mem_size=100000,
-        eps_dec=1e-5,
+        max_mem_size=1000000,
+        eps_dec=5e-5,
         eps_end=0.01
     )
-    train_agent_with_plots(episodes=3000, agent=agent, update_target_every=10)
-        # Zapisanie wytrenowanego modelu
+    train_agent_with_plots(episodes=1500, agent=agent, update_target_every=50)
     T.save(agent.Q_eval.state_dict(), "dqn_model.pth")
-    print("Model został zapisany w pliku dqn_model.pth")
+    print("The model has been saved to dqn_model.pth")
+
 
