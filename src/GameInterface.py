@@ -211,7 +211,7 @@ def run():
     game.start_game()
     initial_state = GameState(game).encode_state()
     agent = Agent(gamma=0.9, epsilon=0.0, learning_rate=0.001, input_dims=len(initial_state), batch_size=128, n_actions=100)
-    agent.load_model("weights/dqn_model.pth")
+    agent.load_model("models/dqn_model2.pth")
     selected_card = None
     is_running = True
     pause_after_card = False
@@ -231,7 +231,7 @@ def run():
         screen.blit(avatar1, (0, 0))
         screen.blit(avatar2, (0, 0))
         draw_player_turn(screen, width, height, game.count_turn)
-        display_player_hand(screen, width, 20, game.players[1], is_visible=True)
+        display_player_hand(screen, width, 20, game.players[1], is_visible=False)
         highlighted_card = display_player_hand(screen, width, height - CARD_HEIGHT - 20, game.players[0])
         is_draw_pile_clicked = display_and_check_deck(screen, width, height, game.deck)
         display_timer(screen, elapsed_time, width)
@@ -275,7 +275,7 @@ def run():
                                     screen.blit(avatar1, (0, 0))
                                     screen.blit(avatar2, (0, 0))
                                     draw_player_turn(screen, width, height, game.count_turn)
-                                    display_player_hand(screen, width, 20, game.players[1], is_visible=True)
+                                    display_player_hand(screen, width, 20, game.players[1], is_visible=False)
                                     display_player_hand(screen, width, height - CARD_HEIGHT - 20, game.players[0])
                                     display_and_check_deck(screen, width, height, game.deck)
                                     display_timer(screen, elapsed_time, width)
@@ -317,7 +317,7 @@ def run():
                 screen.blit(avatar1, (0, 0))
                 screen.blit(avatar2, (0, 0))
                 draw_player_turn(screen, width, height, game.count_turn)
-                display_player_hand(screen, width, 20, game.players[1], is_visible=True)
+                display_player_hand(screen, width, 20, game.players[1], is_visible=False)
                 highlighted_card = display_player_hand(screen, width, height - CARD_HEIGHT - 20, game.players[0])
                 is_draw_pile_clicked = display_and_check_deck(screen, width, height, game.deck)
                 display_timer(screen, elapsed_time, width)
@@ -341,4 +341,5 @@ def run():
     else:
         display_final_screen(screen, width, height, "You Lose!", "Better luck next time! Press any key to exit.", (128, 0, 0))
         pygame.quit()
+
 
