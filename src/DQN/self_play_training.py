@@ -55,7 +55,7 @@ if __name__ == "__main__":
     game.start_game()
     initial_state = GameState(game).encode_state()
     opponent_agent = Agent(gamma=0.9, epsilon=0.0, learning_rate=0.001, input_dims=len(initial_state), batch_size=128, n_actions=100)
-    opponent_agent.load_model("weights/dqn_model.pth")
+    opponent_agent.load_model("models/dqn_model.pth")
   
     agent = Agent(
         gamma=0.9,
