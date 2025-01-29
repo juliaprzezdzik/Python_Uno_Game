@@ -49,7 +49,8 @@ class Game:
 
     def draw_card(self,player_index):
         player = self.players[player_index]
-        for _ in range( 1 + self.bonus_number_of_cards_to_draw):
+        count = self.bonus_number_of_cards_to_draw if self.bonus_number_of_cards_to_draw > 0 else 1
+        for _ in range(count):
             player.draw_card(self.deck)
         player.sort_cards_in_hand()
         self.bonus_number_of_cards_to_draw = 0
@@ -111,7 +112,7 @@ class Game:
                     self.change_color(color)
                 return
         self.draw_card(player_index)
-              
+
 if __name__ == "__main__":
     game = Game()
     game.start_game()
