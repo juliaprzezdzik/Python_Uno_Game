@@ -6,7 +6,7 @@ class Action:
         self.game_state = state
         self.n_actions = self.game_state.player_cards_count
 
-    def permorm_action(self, game, action, state, index, len_available_actions):
+    def permorm_action(self, game, action, state, index, len_available_actions, agent=None):
         reward = 0
         prev_state = state
         has_valid_move = any(
@@ -59,9 +59,13 @@ class Action:
             game.track_turn()
                       
         if game.count_turn == 0:
-            game.random_move(0)
+            if agent is None:
+                game.random_move(0)
+            else:
+                game.bot_move(agent, 0)
+
             if game.check_winner() == game.players[0]:
-                reward -= 100
+                reward -= 50
             game.track_turn()
 
         total_cards_in_hand = game.players[1].count_cards_in_hand()
