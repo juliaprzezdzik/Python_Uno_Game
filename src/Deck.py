@@ -75,3 +75,4 @@ class Deck:
     def display_discarted(self):
         for card in self.discarded:
             print(f'{card}')
+
