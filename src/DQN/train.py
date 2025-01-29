@@ -7,7 +7,7 @@ from src.DQN.Agent import Agent
 from src.DQN.Action import Action
 import torch as T
 
-def train_agent_with_plots(episodes, agent, opponent_agent, update_target_every=10):
+def train_agent_with_plots(episodes, agent, update_target_every=10):
     rewards = []
     avg_rewards = []
     avg_window = 50
@@ -25,7 +25,7 @@ def train_agent_with_plots(episodes, agent, opponent_agent, update_target_every=
             len_available_actions = len(available_actions)
             action = agent.choose_action(state, available_actions)
             action_class = Action(GameState(game))
-            next_game_state, reward, done = action_class.permorm_action(game, action, GameState(game), episode, len_available_actions, opponent_agent)
+            next_game_state, reward, done = action_class.permorm_action(game, action, GameState(game), episode, len_available_actions)
             next_state = next_game_state.encode_state()
             agent.store_transition(state, action, reward, next_state, done)
             agent.learn()
@@ -54,9 +54,6 @@ if __name__ == "__main__":
     game = Game()
     game.start_game()
     initial_state = GameState(game).encode_state()
-    opponent_agent = Agent(gamma=0.9, epsilon=0.0, learning_rate=0.001, input_dims=len(initial_state), batch_size=128, n_actions=100)
-    opponent_agent.load_model("weights/dqn_model.pth")
-  
     agent = Agent(
         gamma=0.9,
         epsilon=1.0,
@@ -68,9 +65,8 @@ if __name__ == "__main__":
         eps_dec=5e-5,
         eps_end=0.01
     )
-
-    train_agent_with_plots(episodes=1500, agent=agent, opponent_agent=opponent_agent, update_target_every=50)
-    T.save(agent.Q_eval.state_dict(), "models/dqn_model2.pth")
-    print("The model has been saved to models/dqn_model2.pth")
+    train_agent_with_plots(episodes=1500, agent=agent, update_target_every=50)
+    T.save(agent.Q_eval.state_dict(), "models/dqn_model.pth")
+    print("Model został zapisany w pliku dqn_model.pth")
 
 
