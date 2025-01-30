@@ -19,6 +19,37 @@ class Game:
         self.skip = False
         self.is_color_changed = False
 
+    @staticmethod
+    def action_to_card(action, player):
+        if action.startswith("Play Wild"):
+            parts = action.split()
+            if len(parts) == 3:
+                wild_type = parts[1]
+                chosen_color = parts[2]
+                for card in player.cards_in_hand:
+                    if card.value == wild_type:
+                        return card, chosen_color
+        elif action.startswith("Play"):
+            parts = action.split()
+            if len(parts) >= 3:
+                color = parts[1]
+                value = " ".join(parts[2:])
+                for card in player.cards_in_hand:
+                    if card.color == color and card.value == value:
+                        return card, None
+        elif action == "Draw Card":
+            return None, None
+        return None, None
+
+    def is_valid_action_custom(self, player_index, action):
+        if action == "Draw Card":
+            return True
+        card, chosen_color = self.action_to_card(action, self.players[player_index])
+        if card is None:
+            return False
+        top_card = self.deck.get_top_discarded_card()
+        return self.is_valid_move(card, top_card)
+
     def track_turn(self):
         if self.skip:
             self.skip = False
@@ -52,7 +83,8 @@ class Game:
 
     def draw_card(self,player_index):
         player = self.players[player_index]
-        for _ in range( 1 + self.bonus_number_of_cards_to_draw):
+        count = self.bonus_number_of_cards_to_draw if self.bonus_number_of_cards_to_draw > 0 else 1
+        for _ in range(count):
             player.draw_card(self.deck)
         player.sort_cards_in_hand()
         self.bonus_number_of_cards_to_draw = 0
@@ -135,7 +167,7 @@ class Game:
             if ((current_card.value == "Draw Two" or current_card.value == "Wild Draw Four") and self.next_player_takes_cards):
                 if card.value == "Draw Two" or card.value == "Wild Draw Four":
                     available_actions.append(index)
-                    available_cards.append([index, card])  
+                    available_cards.append([index, card])
             elif card.value == self.deck.get_top_discarded_card().value or card.color == self.deck.get_top_discarded_card().color or card.value in self.deck.wild_cards:
                 available_actions.append(index)
                 available_cards.append([index, card])
