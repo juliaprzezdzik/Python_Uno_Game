@@ -14,6 +14,7 @@ install_requires=[
     'tensordict==0.6.1',
     'scipy',
     'matplotlib',
+    'h5py',
     ],
     python_requires='>=3.10',
 )
