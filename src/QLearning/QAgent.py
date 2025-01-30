@@ -1,5 +1,5 @@
 import random
-from Environment import Environment
+from .Environment import Environment
 import matplotlib.pyplot as plt
 import h5py
 import numpy as np
@@ -144,4 +144,4 @@ if __name__ == "__main__":
         gamma=0.9,
         epsilon=1.0
     )
-    train_agents(2000, environment, agent1, agent2)
+    train_agents(10000, environment, agent1, agent2)

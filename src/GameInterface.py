@@ -1,5 +1,7 @@
 import pygame
 from src.Game import Game
+from QLearning.QAgent import QLearningAgent
+from QLearning.Environment import Environment
 
 pygame.init()
 
@@ -201,6 +203,22 @@ def display_timer(screen, elapsed_time, width):
     time_rect = time_text.get_rect(topleft=(20, 10))
     screen.blit(time_text, time_rect)
 
+def get_current_state(game, player_index=1):
+    player = game.players[player_index]
+    opponent = game.players[1 - player_index]
+    top_card = game.deck.get_top_discarded_card()
+    state = (
+        len(player.cards_in_hand),
+        len(opponent.cards_in_hand),
+        Environment.color_to_num(top_card.color) if top_card else 4,
+        Environment.value_to_num(top_card.value) if top_card else 14,
+        int(any(card.value == "Skip" for card in player.cards_in_hand)),
+        int(any(card.value == "Draw Two" for card in player.cards_in_hand)),
+        int(any(card.value == "Wild" for card in player.cards_in_hand)),
+        int(any(card.value == "Wild Draw Four" for card in player.cards_in_hand))
+    )
+    return state
+
 def run():
     width, height = start_menu()
     screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
@@ -212,6 +230,13 @@ def run():
     pause_after_card = False
     background_surface, avatar1, avatar2 = read_background(width, height)
     start_time = pygame.time.get_ticks()
+    agent = QLearningAgent(
+        actions=Environment.define_actions(),
+        alpha=0.3,
+        gamma=0.9,
+        epsilon=0.05
+    )
+    agent.load_q_table_from_h5('QLearning.q_table_A.h5')
     while game.check_winner() is None and is_running:
         elapsed_time = (pygame.time.get_ticks() - start_time) // 1000
         for event in pygame.event.get():
@@ -327,7 +352,23 @@ def run():
                 for _ in range(3):
                     game.draw_card(0)
         else:
-            game.random_move()
+            state = get_current_state(game, player_index=1)
+            valid_actions = [action for action in agent.actions if game.is_valid_action_custom(1, action)]
+            if not valid_actions:
+                action = "Draw Card"
+            else:
+                action = agent.choose_action(state, valid_actions)
+            if action == "Draw Card":
+                game.draw_card(1)
+            else:
+                card, chosen_color = Game.action_to_card(action, game.players[1])
+                if card is not None:
+                    success = game.play_card(1, game.players[1].cards_in_hand.index(card))
+                    if success:
+                        if card.value in ["Wild", "Wild Draw Four"] and chosen_color:
+                            game.change_color(chosen_color)
+                        if len(game.players[1].cards_in_hand) == 1:
+                            pass
             pause_after_card = True
         pygame.display.flip()
     if game.check_winner() == game.players[0]:

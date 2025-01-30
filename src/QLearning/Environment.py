@@ -106,30 +106,8 @@ class Environment:
     def is_valid_action(self, action):
         agent = self.game.players[self.current_player]
         top_card = self.game.deck.get_top_discarded_card()
-        card, _ = self.action_to_card(action, agent)
+        card, _ = Game.action_to_card(action, agent)
         return self.game.is_valid_move(card, top_card) if card else action == "Draw Card"
-
-    @staticmethod
-    def action_to_card(action, player):
-        if action.startswith("Play Wild"):
-            parts = action.split()
-            if len(parts) == 3:
-                wild_type = parts[1]
-                chosen_color = parts[2]
-                for card in player.cards_in_hand:
-                    if card.value == wild_type:
-                        return card, chosen_color
-        elif action.startswith("Play"):
-            parts = action.split()
-            if len(parts) >= 3:
-                color = parts[1]
-                value = " ".join(parts[2:])
-                for card in player.cards_in_hand:
-                    if card.color == color and card.value == value:
-                        return card, None
-        elif action == "Draw Card":
-            return None, None
-        return None, None
 
     def calculate_reward(self, agent, card, chosen_color):
         reward = 0
@@ -151,8 +129,6 @@ class Environment:
             reward += 0.6
             if self.should_use_wild(agent, card, chosen_color):
                 reward += 1
-            else:
-                reward -= 0.5
         else:
             reward += max(0, 5 - len(agent.cards_in_hand))
         if len(agent.cards_in_hand) == 1:
@@ -170,7 +146,8 @@ class Environment:
             if card.color in color_counts:
                 color_counts[card.color] += 1
         most_common_color_count = max(color_counts.values())
-        reward += 0.1 * most_common_color_count
+        if len(agent.cards_in_hand) > 6:
+            reward += 0.1 * most_common_color_count
         return reward
 
     def should_use_draw_two(self, agent, card):
@@ -211,7 +188,7 @@ class Environment:
             reward = -1
             valid = True
         else:
-            card, chosen_color = self.action_to_card(action, agent)
+            card, chosen_color = Game.action_to_card(action, agent)
             if card is not None:
                 card_index = agent.cards_in_hand.index(card)
                 if self.game.play_card(acting_player, card_index):
