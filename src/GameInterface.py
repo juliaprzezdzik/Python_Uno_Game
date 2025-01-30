@@ -2,8 +2,8 @@ import pygame
 from src.Game import Game
 from src.DQN.Agent import Agent
 from src.DQN.GameState import GameState
-from QLearning.QAgent import QLearningAgent
-from QLearning.Environment import Environment
+from src.QLearning.QAgent import QLearningAgent
+from src.QLearning.Environment import Environment
 
 pygame.init()
 
