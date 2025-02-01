@@ -18,7 +18,7 @@ class Action:
             if action >= game.players[1].count_cards_in_hand():
                 game.draw_card(1)
                 if has_valid_move:
-                    reward -= 20
+                    reward -= 2.0
             elif game.play_card(1, action):
                 total_cards_in_hand = game.players[1].count_cards_in_hand()
                 opponent_cards = game.players[0].count_cards_in_hand()
@@ -29,33 +29,33 @@ class Action:
                 most_common_color = game.players[1].get_most_common_color()
 
                 if total_cards_in_hand == skip_count:
-                    reward += 15
+                    reward += 1.5
                 if total_cards_in_hand == wild_count:
-                    reward += 15
+                    reward += 1.5
                 if card_played.value == "Skip":
-                    reward += 5 if len_available_actions < 1 + skip_count else -5
+                    reward += 0.5 if len_available_actions < 1 + skip_count else -0.5
                 if game.is_color_changed:
                     game.change_color(most_common_color)
                 if opponent_cards == 1:
-                    reward += 15 if card_played.value in ["Draw Two", "Wild Draw Four"] else -1
-                elif opponent_cards <= 2:
-                    reward += 5 if card_played.value in ["Draw Two", "Wild Draw Four"] else -1
+                    reward += 1.5 if card_played.value in ["Draw Two", "Wild Draw Four"] else -0.1
+                elif opponent_cards <= 3:
+                    reward += 0.5 if card_played.value in ["Draw Two", "Wild Draw Four"] else -0.1
                 if card_played.value == "Wild" and len_available_actions > 1 + wild_count:
-                    reward -= 5
+                    reward -= 0.5
                 elif card_played.value == "Wild":
-                    reward += 1
+                    reward += 0.1
                 if card_played.color == most_common_color:
-                    reward += 2
+                    reward += 0.2
                 if card_played.value == game.deck.discarded[-2].value:
-                    reward += 1
+                    reward += 0.1
                 if total_cards_in_hand == 1:
-                    reward += 10 if card_played.value in ["Wild", "Wild Draw Four"] else 5
+                    reward += 1.0 if card_played.value in ["Wild", "Wild Draw Four"] else 0.5
                 if card_played.value in value_counts:
                     identical_cards_count = game.players[1].count_identical_cards(card_played)
                     if len_available_actions > 2 + identical_cards_count:
-                        reward -= 10
+                        reward -= 1.0
                 if game.check_winner() == game.players[1]:
-                    reward += 100
+                    reward += 10.0
             game.track_turn()
                       
         if game.count_turn == 0:
@@ -65,7 +65,7 @@ class Action:
                 game.bot_move(agent, 0)
 
             if game.check_winner() == game.players[0]:
-                reward -= 50
+                reward -= 5.0
             game.track_turn()
 
         total_cards_in_hand = game.players[1].count_cards_in_hand()
@@ -82,9 +82,9 @@ class Action:
         next_score = self.calculate_state_score(next_state)
         effectiveness = next_score - prev_score
         if effectiveness > 0:
-            return 1
+            return 0.1
         elif effectiveness < 0:
-            return -1
+            return -0.1
         else:
             return 0
 
@@ -93,3 +93,4 @@ class Action:
         opponent_cards_count = state.opponent_cards_count
         score = (opponent_cards_count - player_cards_count)
         return score
+

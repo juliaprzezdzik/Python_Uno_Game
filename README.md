@@ -4,7 +4,7 @@ This is our implementation of popular card game "Uno". In the deck of cards ther
 # Requirements
 To run this project, you need:
 - Python 3.9+
-- The dependencies listed in 'requirements.txt'
+- The dependencies listed in 'setup.py'
 
 # Installation
 First, clone the repository:
